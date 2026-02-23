@@ -14,7 +14,7 @@ import { Divider, List, Text, useTheme } from "react-native-paper";
 import { AppTheme } from "types/ThemeTypes";
 import ModalizeUser from "./Layouts/ModalizeUser";
 import SkeletonUser from "./Layouts/SkeletonUser";
-import { getCameraPermission, permissionCamera } from "helpers/camara/cameraHelper";
+import { getCameraPermission } from "helpers/camara/cameraHelper";
 import { PermissionStatus as PermissionStatusCamara  } from 'expo-image-picker'
 import { PermissionStatus as PermissionStatusLocation } from 'expo-location'
 import { PermissionStatus as PermissionStatusNotification } from 'expo-notifications'
@@ -30,8 +30,11 @@ import ModalizeBiometric from "./Layouts/ModalizeBiometric";
 import { checkBiometricStatus } from "helpers/Biometric/BiometricHelper";
 import { BiometricStatus } from "types/Biometric/BiometricTypes";
 import alertsState from "helpers/states/alertsState";
-import { getValueStorage } from "helpers/store/storeApp";
+import { getValueStorage, setValueStorage } from "helpers/store/storeApp";
 import { UserSessionType } from "types/auth/UserSessionType";
+import { openCamera, openGallery, permissionCamera } from "helpers/camara/cameraHelper";
+import { AJAX, FormDataGenerate, URLPIOAPP } from "helpers/http/ajax";
+import { Alert } from "react-native";
 
 export default function PersonalUser() {
 
@@ -40,6 +43,7 @@ export default function PersonalUser() {
     const modalizeRefUser = useRef<Modalize>(null)
     const modalizeRefBiometric = useRef<Modalize>(null)
     const [loadingUser, setLoadingUser] = useState<boolean>(false)
+    const [uploadingImage, setUploadingImage] = useState<boolean>(false)
     const [biometricStatus, setBiometricStatus] = useState<BiometricStatus|null>(null)
     const [userSession, setUserSession] = useState<UserSessionType>()
     const { openVisibleSnackBar } = alertsState()
@@ -55,7 +59,69 @@ export default function PersonalUser() {
     })
 
     const onPressIconButtonEditImage = () => {
-        onOpenModalize(modalizeRefUser)
+        Alert.alert(
+            "Foto de Perfil",
+            "Elige una opción",
+            [
+              { text: "Cámara", onPress: () => handleSelectImage('camera') },
+              { text: "Galería", onPress: () => handleSelectImage('gallery') },
+              { text: "Cancelar", style: "cancel" }
+            ]
+        );
+    }
+
+    const handleSelectImage = async (type: 'camera' | 'gallery') => {
+        try {
+            let img = null;
+            if (type === 'camera') {
+                const hasPermission = await permissionCamera();
+                if (!hasPermission) {
+                    return openVisibleSnackBar('Se necesitan permisos de cámara', 'warning');
+                }
+                img = await openCamera();
+            } else {
+                img = await openGallery();
+            }
+
+            if (!img) return;
+
+            await uploadProfileImage(img);
+        } catch (error: any) {
+            openVisibleSnackBar(error.message || 'Error al seleccionar imagen', 'error');
+        }
+    }
+
+    const uploadProfileImage = async (imageAsset: any) => {
+        setUploadingImage(true);
+        try {
+            const formData = new FormData() as any;
+            formData.append("image_profile", {
+                name: imageAsset.fileName || "profile.jpg",
+                uri: imageAsset.uri,
+                type: imageAsset.mimeType || "image/jpeg"
+            });
+
+            const response = await AJAX(`${URLPIOAPP}/auth/upload-profile-image`, 'POST', formData, true);
+            
+            if (response.status && response.data?.image_profile) {
+                // Agregar un timestamp (cache buster) para forzar a la app a que refresque la imagen al cambiar su URL en local
+                const imageUrlWithCacheBuster = `${response.data.image_profile}?t=${new Date().getTime()}`;
+                
+                // Actualizar storage con la url de la imagen nueva
+                const updatedUser = { 
+                    ...userSession, 
+                    image_profile: imageUrlWithCacheBuster
+                } as UserSessionType;
+
+                await setValueStorage('user', updatedUser);
+                setUserSession(updatedUser);
+                openVisibleSnackBar(response.message || 'Imagen actualizada', 'success');
+            }
+        } catch (error: any) {
+            openVisibleSnackBar(error.message || 'Error al subir la imagen', 'error');
+        } finally {
+            setUploadingImage(false);
+        }
     }
 
     const onPressListBiometric = () => {
@@ -77,6 +143,7 @@ export default function PersonalUser() {
 
     const getUserStorage = () => {
         const user = getValueStorage('user') as UserSessionType
+        console.log(user);
         setUserSession(user)
     }
 
@@ -135,15 +202,16 @@ export default function PersonalUser() {
                         <View className="mt-6 mb-12 w-full flex-col gap-5">
                             <View className="w-full flex-col items-center">
                                 <View style={{ position: 'relative' }}>
-                                    {/* <IconButtomForm 
+                                    <IconButtomForm 
                                         icon="pencil" 
-                                        size={13} 
+                                        size={18} 
                                         style={{ position: 'absolute', zIndex: 2, right: -5, top: -5 }}
                                         onPress={onPressIconButtonEditImage}
-                                    /> */}
+                                        disabled={uploadingImage}
+                                    />
                                     <AvatarImage 
-                                        style={{ marginBottom: 15 }} 
-                                        img={DEFAULT_USER} 
+                                        style={{ marginBottom: 15, opacity: uploadingImage ? 0.5 : 1 }} 
+                                        img={userSession?.image_profile ? { uri: userSession.image_profile } : DEFAULT_USER} 
                                         size={100}
                                     />
                                 </View>

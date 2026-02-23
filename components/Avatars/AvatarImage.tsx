@@ -1,8 +1,8 @@
-import { ImageSourcePropType, StyleProp, ViewStyle } from "react-native";
-import { Avatar } from "react-native-paper";
+import { ImageSourcePropType, StyleProp, ViewStyle, Image, View } from "react-native";
+import { useTheme, Avatar } from "react-native-paper";
 
 type AvatarImageType = {
-    size?: number | undefined;
+    size?: number;
     img: ImageSourcePropType;
     style?: StyleProp<ViewStyle>;
 }
@@ -12,11 +12,12 @@ export default function AvatarImage({
     img,
     style
 } : AvatarImageType) {
-
+    const theme = useTheme();
     return (
-        <>
-            <Avatar.Image style={[style]} size={size} source={img} />
-        </>
+        <Avatar.Image 
+            size={size}
+            source={img}
+            style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', backgroundColor: theme.colors.primary }, style]}
+        />
     )
-
 }
