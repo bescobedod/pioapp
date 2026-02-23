@@ -6,9 +6,11 @@ import PickerFile from "components/container/PickerFile";
 import ScrollViewContainer from "components/container/ScrollViewContainer";
 import ButtonForm from "components/form/ButtonForm";
 import DropdownForm from "components/form/DropdownForm";
+import IconButtomForm from "components/form/IconButtomForm";
 import PageLayout from "components/Layouts/PageLayout";
 import ListItemComponent from "components/List/ListItemComponent";
 import ListRender from "components/List/ListRender";
+import DataTableInfo from "components/tables/DataTableInfo";
 import PickerVideo from "components/VideoPicker/PickerVideo";
 import alertsState from "helpers/states/alertsState";
 import fotografyState from "helpers/states/fotografyState";
@@ -21,6 +23,8 @@ import { Animated, StyleSheet, View } from "react-native";
 import { ActivityIndicator, Icon, Text, useTheme } from "react-native-paper";
 import Option from "types/Dropdown/Option";
 import { AppTheme } from "types/ThemeTypes";
+
+type TableDataArticulosDevolucion = (DetalleEntradaInventario&{cantidadDevolver:number})
 
 export default function DevolucionCreacionPage() {
     const theme = useTheme() as AppTheme
@@ -37,7 +41,7 @@ export default function DevolucionCreacionPage() {
     const opacity = useRef(new Animated.Value(1)).current
     const [recepciones, setRecepciones] = useState<EntradaInventarioType[]>([])
     const [loadingRecepciones, setLoadingRecepciones] = useState<boolean>(false)
-    const [articulosDevolucion, setArticulosDevolucion] = useState<DetalleEntradaInventario[]>([])
+    const [articulosDevolucion, setArticulosDevolucion] = useState<TableDataArticulosDevolucion[]>([])
     const { openVisibleSnackBar } = alertsState()
     const valueTienda = watch('tienda')
     const valueRecepcion = watch('recepcion')
@@ -77,8 +81,8 @@ export default function DevolucionCreacionPage() {
                 numero: Number(recepcionSelect?.idEntradaInventario),
                 serie: recepcionSelect?.serie ?? ''
             })
-            setArticulosDevolucion(result?.data ?? [])
-            // console.log(result)    
+            const resultMapRecepciones = result.map(el => ({ ...el, cantidadDevolver: 0 })) 
+            setArticulosDevolucion(resultMapRecepciones ?? [])    
         } catch (error) {
             openVisibleSnackBar(`${error}`, 'error')
         }finally {
@@ -107,6 +111,7 @@ export default function DevolucionCreacionPage() {
     useEffect(() => {
         resetField('recepcion', { defaultValue: '' })
         setRecepciones([])
+        setArticulosDevolucion([])
     }, [valueTienda])
 
     useEffect(() => {
@@ -159,6 +164,54 @@ export default function DevolucionCreacionPage() {
                                     errors={errors}
                                     disable={!valueTienda}
                                 />
+
+                                {/* Productos para dar de baja */}
+                                <ListItemComponent
+                                    titleStyle={{ color: theme.colors.primary }}
+                                    title="PRODUCTOS DE BAJA"
+                                    description="Ingresa las cantidades que quieres dar de baja."
+                                    descriptionNumberOfLines={0}
+                                />
+                                <DataTableInfo
+                                    data={articulosDevolucion}
+                                    configTable={[
+                                        {
+                                            data: null,
+                                            name: 'Producto',
+                                            render: (data:TableDataArticulosDevolucion) => (
+                                                <View className="w-full flex flex-col items-start">
+                                                    <Text numberOfLines={0}>
+                                                        {data.nombreProducto}
+                                                    </Text>
+                                                </View>
+                                            ) 
+                                        },
+                                        {
+                                            numericHeader: true,
+                                            numeric: true,
+                                            data: 'cantidadReal',
+                                            name: 'cantidad'
+                                        },
+                                        {
+                                            numeric: true,
+                                            numericHeader: true,
+                                            data: null,
+                                            name: 'Devolver',
+                                            render: (data:TableDataArticulosDevolucion) => {
+                                                return (
+                                                    <View className="flex-row gap-1 items-center">
+                                                        <Text>{data.cantidadDevolver}</Text>
+                                                        <IconButtomForm
+                                                            icon="pencil"
+                                                            onPress={() => {}}
+                                                        />
+                                                    </View>
+                                                )
+                                            }
+                                        }
+                                    ]}
+                                />
+
                                 <ListItemComponent
                                     titleStyle={{ color: theme.colors.primary }}
                                     title="FOTOGRAFIA TEMPERATURA"

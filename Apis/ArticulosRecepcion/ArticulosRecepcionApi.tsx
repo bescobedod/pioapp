@@ -45,7 +45,7 @@ export const getRecepcionesValidDay = async(params:ParamsRecepcionesValidDay) : 
     }
 }
 
-export const getArticulosDevolucion = async(body:BodyArticulosRecepcionType) : Promise<ResponseService<DetalleEntradaInventario[]>> => {
+export const getArticulosDevolucion = async(body:BodyArticulosRecepcionType) : Promise<DetalleEntradaInventario[]> => {
     try {
         const result = await AJAX(`${URLDIVIDENDOS}/dividendos/services/PINULITO_PDV/Inventario/getDevolucionEntradaInventarioDetalle`, 'POST', {
             boleta: null,
@@ -61,6 +61,7 @@ export const getArticulosDevolucion = async(body:BodyArticulosRecepcionType) : P
         return result
     } catch (error) {
         alertsState.getState().openVisibleSnackBar(`${error}`, 'error')
-        return generateJsonError(`${error}`, 'array')
+        return []
+        // return generateJsonError(`${error}`, 'array')
     }
 }

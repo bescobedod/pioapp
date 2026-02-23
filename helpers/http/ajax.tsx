@@ -7,16 +7,17 @@ import { UserSessionType } from "types/auth/UserSessionType";
 import { AuthHedearsType } from "types/Request/AuthorizationTypes";
 import MethodRequestType from "types/Request/MethodRequestType";
 
-export const URLDIVIDENDOS = `http://sistema.grupopinulito.com:81`
+export const URLDIVIDENDOS = `http://3.22.33.142/`
+// export const URLDIVIDENDOS = `http://sistema.grupopinulito.com:81`
 
 //export const URLPIOAPP = `http://192.168.0.153:5001/api`
 
 //local pruva PORT
 // export const URLPIOAPP = `http://10.0.2.2:5000/api`
-export const URLPIOAPP = `https://1n42gnjd-5001.use2.devtunnels.ms/api`
+// export const URLPIOAPP = `https://1n42gnjd-5001.use2.devtunnels.ms/api`
 
 //Produccion
-// export const URLPIOAPP = `https://services.sistemaspinulito.com/pioapi`
+export const URLPIOAPP = `https://services.sistemaspinulito.com/pioapi`
 
 //variables para authentication con basic auth
 // export const BASIC_AUTH_USERNAME = process.env.EXPO_PUBLIC_BASIC_AUTH_USERNAME
