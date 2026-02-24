@@ -25,6 +25,7 @@ import globalState from 'helpers/states/globalState';
 import BiometricStorageType from 'types/Biometric/BiometricStorageType';
 import { UserSessionType } from 'types/auth/UserSessionType';
 import { RouteProp, useRoute } from '@react-navigation/native';
+import { useMicrosoftAuth } from 'helpers/auth/MicrosoftAuthHelper';
 
 type DataFcmType = {
   idDevice: string|null;
@@ -46,6 +47,8 @@ export default function Login() {
   const route = useRoute<RouteProp<{ params:ParamsRouteLogin }, 'params'>>();
   const biometricAutomatic:boolean = route.params?.biometricAutomatic ?? true;
   
+  // Microsoft Auth Hook
+  const { request: msRequest, response: msResponse, promptAsync: msPromptAsync, getMicrosoftUserInfo } = useMicrosoftAuth();
 
   const validLogin = async(data: schemaLoginFormValidateType, idDevice:string|null, exponentPushToken:string|null) : Promise<ResponseService> => {
     try {
@@ -229,6 +232,59 @@ export default function Login() {
     init()
   }, [])
 
+  // ======= MICROSOFT LOGIN EFFECT ======= //
+  useEffect(() => {
+    if (msResponse?.type === 'success') {
+      const { authentication } = msResponse;
+      if (authentication?.accessToken) {
+        handleMicrosoftLogin(authentication.accessToken);
+      }
+    } else if (msResponse?.type === 'error') {
+      openVisibleSnackBar('Error en autenticación con Microsoft', 'error');
+    }
+  }, [msResponse]);
+
+  const handleMicrosoftLogin = async (accessToken: string) => {
+    setLoadingLogin(true);
+    setOpenScreenLoading();
+    try {
+      // Pedir información básica a Graph API para obtener el ID real
+      const msUser = await getMicrosoftUserInfo(accessToken);
+      if (!msUser || !msUser.id) {
+        throw new Error("No se pudo obtener el perfil de Microsoft");
+      }
+
+      const dataFcm = await generateTokenFCM();
+      
+      const payload = {
+        ms_account_id: msUser.id,
+        raw_data: msUser,
+        id_unique_device: dataFcm.idDevice,
+        exponent_push_token: dataFcm.exponentPushToken
+      };
+
+      const result = await AJAX(`${URLPIOAPP}/auth/microsoft/login`, 'POST', payload, false, false, null, 'basic');
+
+      if (result.status) {
+        if (result.data?.baja) {
+          NavigationService.reset('UserDeactivated');
+        } else {
+          NavigationService.reset('Home');
+          setValueStorage('user', result.data);
+          openVisibleSnackBar('¡Bienvenido!', 'success');
+        }
+      } else {
+        openVisibleSnackBar(result.message || 'Error en login de Microsoft', 'error');
+      }
+
+    } catch (error: any) {
+      openVisibleSnackBar(error.message || 'Error al procesar login de Microsoft', 'error');
+    } finally {
+      setLoadingLogin(false);
+      setCloseScreenLoading();
+    }
+  };
+
   return (
     <FormAdaptiveKeyBoard>
       <View className='flex-1 items-center justify-center px-8'>
@@ -291,26 +347,22 @@ export default function Login() {
         </View>
 
         <View className='w-full mt-3 flex-row justify-center items-center flex-wrap' style={{ gap: 5 }}>
-          {/* <SurfaceTapButton 
-            icon='gesture-tap-button'
-            title='Marcaje'
-            onPress={()=>NavigationService.navigate('Marcaje')}
-            disabled={loadingLogin}
-          /> */}
           <SurfaceTapButton 
             icon='fingerprint'
             title='Huella'
             onPress={() => loginBiometric('button')}
-            //tambien agregar validacion que este solo debe aparveer si el dispositov tiene activado el biometrico
             visible={biometricStatus?.enrolled && biometricStatus?.hasHardware}
             disabled={loadingLogin}
           />
-          {/* <SurfaceTapButton 
-            icon='face-recognition'
-            title='Facial'
-            visible={biometricStatus?.supportedTypes?.includes('FaceID') ?? false}
-            disabled={loadingLogin}
-          /> */}
+          <SurfaceTapButton 
+            icon='microsoft'
+            title='Office 365'
+            onPress={() => {
+                if(msRequest) msPromptAsync();
+                else openVisibleSnackBar("Espere a que cargue la configuración de Microsoft", "normal");
+            }}
+            disabled={loadingLogin || !msRequest}
+          />
         </View>
 
       </View>

@@ -4,6 +4,7 @@ export type UserSessionType = {
   direccion?: string;
   dpi?: string;
   email?: string;
+  email_office?: string | null;
   fecha_nacimiento?: string;
   first_last_name?: string;
   first_name?: string;

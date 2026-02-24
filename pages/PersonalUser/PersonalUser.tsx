@@ -35,6 +35,7 @@ import { UserSessionType } from "types/auth/UserSessionType";
 import { openCamera, openGallery, permissionCamera } from "helpers/camara/cameraHelper";
 import { AJAX, FormDataGenerate, URLPIOAPP } from "helpers/http/ajax";
 import { Alert } from "react-native";
+import { useMicrosoftAuth } from "helpers/auth/MicrosoftAuthHelper";
 
 export default function PersonalUser() {
 
@@ -57,6 +58,9 @@ export default function PersonalUser() {
         notification: null as PermissionStatusNotification | null,
         ts: Date.now(),
     })
+
+    // Microsoft Auth Hook
+    const { request: msRequest, response: msResponse, promptAsync: msPromptAsync, getMicrosoftUserInfo } = useMicrosoftAuth();
 
     const onPressIconButtonEditImage = () => {
         Alert.alert(
@@ -147,6 +151,54 @@ export default function PersonalUser() {
         setUserSession(user)
     }
 
+    // ======= MICROSOFT LINK EFFECT ======= //
+    useEffect(() => {
+        if (msResponse?.type === 'success') {
+            const { authentication } = msResponse;
+            if (authentication?.accessToken) {
+                handleLinkMicrosoftAccount(authentication.accessToken);
+            }
+        } else if (msResponse?.type === 'error') {
+            console.log(msResponse);
+            openVisibleSnackBar('Error al vincular cuenta de Microsoft', 'error');
+        }
+    }, [msResponse]);
+
+    const handleLinkMicrosoftAccount = async (accessToken: string) => {
+        setLoadingUser(true);
+        console.log("accessToken", accessToken);
+        try {
+            const msUser = await getMicrosoftUserInfo(accessToken);
+            if (!msUser || !msUser.id) {
+                throw new Error("No se pudo obtener el perfil de Microsoft");
+            }
+
+            const payload = {
+                ms_account_id: msUser.id,
+                email_office: msUser.mail || msUser.userPrincipalName,
+                raw_data: msUser
+            };
+
+            const response = await AJAX(`${URLPIOAPP}/auth/microsoft/link-account`, 'POST', payload, true);
+            
+            if (response.status) {
+                openVisibleSnackBar('¡Cuenta de Microsoft vinculada exitosamente!', 'success');
+                // Opcional: Actualizar el session local si se desea persistir el correo de office ahí
+                /*
+                const updatedUser = { ...userSession, email_office: payload.email_office } as UserSessionType;
+                await setValueStorage('user', updatedUser);
+                setUserSession(updatedUser);
+                */
+            } else {
+                openVisibleSnackBar(response.message || 'Error al vincular cuenta', 'error');
+            }
+        } catch (error: any) {
+             openVisibleSnackBar(error.message || 'Ocurrió un error al vincular Microsoft', 'error');
+        } finally {
+             setLoadingUser(false);
+        }
+    };
+
     const init = async() => {
         setLoadingUser(true)
         getUserStorage()
@@ -231,11 +283,12 @@ export default function PersonalUser() {
 
                                 <ListItemComponent
                                     onPress={() => {
-                                        openVisibleSnackBar(`Proximamente en actualizaciones mas recientes.`, 'normal')
+                                        if (msRequest) msPromptAsync();
+                                        else openVisibleSnackBar("Espere a que cargue la configuración de Microsoft", "normal");
                                     }}
                                     iconLeft="microsoft"
                                     title={"Cuenta office 365"}
-                                    description={"vincular cuenta"}
+                                    description={userSession?.email_office ? userSession.email_office : "Vincular cuenta"}
                                     rightElements={<List.Icon icon={'chevron-right'}/>}
                                 />
                                 {
