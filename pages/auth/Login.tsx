@@ -48,7 +48,7 @@ export default function Login() {
   const biometricAutomatic:boolean = route.params?.biometricAutomatic ?? true;
   
   // Microsoft Auth Hook
-  const { request: msRequest, response: msResponse, promptAsync: msPromptAsync, getMicrosoftUserInfo } = useMicrosoftAuth();
+  const { request: msRequest, response: msResponse, promptAsync: msPromptAsync, getMicrosoftUserInfo, exchangeCodeForToken } = useMicrosoftAuth();
 
   const validLogin = async(data: schemaLoginFormValidateType, idDevice:string|null, exponentPushToken:string|null) : Promise<ResponseService> => {
     try {
@@ -235,19 +235,22 @@ export default function Login() {
   // ======= MICROSOFT LOGIN EFFECT ======= //
   useEffect(() => {
     if (msResponse?.type === 'success') {
-      const { authentication } = msResponse;
-      if (authentication?.accessToken) {
-        handleMicrosoftLogin(authentication.accessToken);
+      const code = msResponse.params?.code;
+      if (code) {
+        handleMicrosoftLogin(code);
       }
     } else if (msResponse?.type === 'error') {
       openVisibleSnackBar('Error en autenticación con Microsoft', 'error');
     }
   }, [msResponse]);
 
-  const handleMicrosoftLogin = async (accessToken: string) => {
+  const handleMicrosoftLogin = async (code: string) => {
     setLoadingLogin(true);
     setOpenScreenLoading();
     try {
+      const accessToken = await exchangeCodeForToken(code);
+      if (!accessToken) throw new Error("No se pudo obtener el token de acceso");
+
       // Pedir información básica a Graph API para obtener el ID real
       const msUser = await getMicrosoftUserInfo(accessToken);
       if (!msUser || !msUser.id) {

@@ -60,7 +60,7 @@ export default function PersonalUser() {
     })
 
     // Microsoft Auth Hook
-    const { request: msRequest, response: msResponse, promptAsync: msPromptAsync, getMicrosoftUserInfo } = useMicrosoftAuth();
+    const { request: msRequest, response: msResponse, promptAsync: msPromptAsync, getMicrosoftUserInfo, exchangeCodeForToken } = useMicrosoftAuth();
 
     const onPressIconButtonEditImage = () => {
         Alert.alert(
@@ -147,16 +147,15 @@ export default function PersonalUser() {
 
     const getUserStorage = () => {
         const user = getValueStorage('user') as UserSessionType
-        console.log(user);
         setUserSession(user)
     }
 
     // ======= MICROSOFT LINK EFFECT ======= //
     useEffect(() => {
         if (msResponse?.type === 'success') {
-            const { authentication } = msResponse;
-            if (authentication?.accessToken) {
-                handleLinkMicrosoftAccount(authentication.accessToken);
+            const code = msResponse.params?.code;
+            if (code) {
+                handleLinkMicrosoftAccount(code);
             }
         } else if (msResponse?.type === 'error') {
             console.log(msResponse);
@@ -164,10 +163,12 @@ export default function PersonalUser() {
         }
     }, [msResponse]);
 
-    const handleLinkMicrosoftAccount = async (accessToken: string) => {
+    const handleLinkMicrosoftAccount = async (code: string) => {
         setLoadingUser(true);
-        console.log("accessToken", accessToken);
         try {
+            const accessToken = await exchangeCodeForToken(code);
+            if (!accessToken) throw new Error("No se pudo obtener el token de acceso");
+
             const msUser = await getMicrosoftUserInfo(accessToken);
             if (!msUser || !msUser.id) {
                 throw new Error("No se pudo obtener el perfil de Microsoft");
@@ -178,8 +179,7 @@ export default function PersonalUser() {
                 email_office: msUser.mail || msUser.userPrincipalName,
                 raw_data: msUser
             };
-
-            const response = await AJAX(`${URLPIOAPP}/auth/microsoft/link-account`, 'POST', payload, true);
+            const response = await AJAX(`${URLPIOAPP}/auth/microsoft/link-account`, 'POST', payload);
             
             if (response.status) {
                 openVisibleSnackBar('¡Cuenta de Microsoft vinculada exitosamente!', 'success');

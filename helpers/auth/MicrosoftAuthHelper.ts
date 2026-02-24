@@ -1,6 +1,6 @@
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
+import { makeRedirectUri, exchangeCodeAsync } from 'expo-auth-session';
 import { URLPIOAPP } from '../http/ajax'; // Or adjust path as needed depending on where this is placed
 import * as Linking from 'expo-linking';
 
@@ -29,11 +29,32 @@ export const useMicrosoftAuth = () => {
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
       clientId: CLIENT_ID,
-      scopes: ['openid', 'profile', 'email', 'offline_access'],
+      scopes: ['openid', 'profile', 'email', 'offline_access', 'User.Read'],
       redirectUri,
+      extraParams: {
+        prompt: 'select_account',
+      },
     },
     discovery
   );
+
+  const exchangeCodeForToken = async (code: string) => {
+    try {
+      const tokenResult = await exchangeCodeAsync(
+        {
+          clientId: CLIENT_ID,
+          code,
+          redirectUri,
+          extraParams: request?.codeVerifier ? { code_verifier: request.codeVerifier } : undefined,
+        },
+        discovery
+      );
+      return tokenResult.accessToken;
+    } catch (error) {
+      console.error('Error exchanging MS code for token', error);
+      return null;
+    }
+  };
 
   const getMicrosoftUserInfo = async (accessToken: string) => {
     try {
@@ -55,5 +76,6 @@ export const useMicrosoftAuth = () => {
     response,
     promptAsync,
     getMicrosoftUserInfo,
+    exchangeCodeForToken,
   };
 };
