@@ -1,3 +1,5 @@
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider, configureFonts } from 'react-native-paper'
 import appThemeLight from 'themes/appThemeLight';
 import appThemeDark from 'themes/appThemeDark';
@@ -70,14 +72,14 @@ export default function App() {
   }, [])
 
   return (
-    <PaperProvider theme={theme}>
-      {
-        <AppInitTransition loading={!fontsLoaded || !validSession}>
-          <NavigationContainer 
-            ref={navigationGlobal}
-            onReady={NavigationService.updateCurrentRouteName}
-            onStateChange={NavigationService.updateCurrentRouteName}
-          >
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppInitTransition loading={!fontsLoaded || !validSession}>
+        <NavigationContainer 
+          ref={navigationGlobal}
+          onReady={NavigationService.updateCurrentRouteName}
+          onStateChange={NavigationService.updateCurrentRouteName}
+        >
+          <PaperProvider theme={theme}>
             <DrawerDashboard/>
             {/* Loading screen global */}
             <LoadingScreen/>
@@ -85,9 +87,9 @@ export default function App() {
             <SnackBarAlert/>
 
             <StackNavigatorApp initialRouteName={routerInit}/>
-          </NavigationContainer>
-        </AppInitTransition>
-      }
-    </PaperProvider>
+          </PaperProvider>
+        </NavigationContainer>
+      </AppInitTransition>
+    </GestureHandlerRootView>
   );
 }

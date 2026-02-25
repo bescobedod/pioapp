@@ -5,6 +5,8 @@ import PageLayout from 'components/Layouts/PageLayout'
 import { useCallback, useEffect, useRef } from 'react'
 import { generateJsonError, ResponseService } from 'types/RequestType'
 import { AJAX, URLPIOAPP } from 'helpers/http/ajax'
+import { NavigationService } from 'helpers/navigator/navigationScreens'
+import { Button, Text } from 'react-native-paper'
 import alertsState from 'helpers/states/alertsState'
 import globalState from 'helpers/states/globalState'
 import { orderRoutersMenu } from 'helpers/Global/HomeGlobalHelper'
@@ -13,6 +15,10 @@ import { useFocusEffect } from '@react-navigation/native'
 import { initSocketGlobal } from 'Sockets/Global/GlobalSocket'
 import { getValueStorage } from 'helpers/store/storeApp'
 import { UserSessionType } from 'types/auth/UserSessionType'
+import usePublicacionesState from 'helpers/states/publicacionesState'
+import CardPublicacion from 'components/Cards/CardPublicacion'
+import { ScrollView } from 'react-native'
+import SkeletonPublicaciones from './Layouts/SkeletonPublicaciones'
 
 export type PermissionMenuType = {
     id_permission_menu?: number;
@@ -32,6 +38,7 @@ export default function Home(){
     const { openVisibleSnackBar } = alertsState()
     const { setOpenScreenLoading, setCloseScreenLoading, setLoadingMenuInit } = globalState()
     const { setRouterMenu } = menuRouterState()
+    const { dashboardFeeds, loadDashboardFeeds, isLoadingDashboard } = usePublicacionesState()
     const didInit = useRef(false);
 
     const getMenusPermisssion = async():Promise<ResponseService<PermissionMenuType[]>> => {
@@ -63,6 +70,8 @@ export default function Home(){
           initalize()
           didInit.current = true;
         }
+        // Recargar publicaciones cada vez que entra al Home
+        loadDashboardFeeds();
       }, [])
     );
 
@@ -78,29 +87,40 @@ export default function Home(){
 
             {/* <ScrollViewContainer> */}
 
-                <View className='w-full mt-6 flex flex-col gap-6 flex-1 items-center justify-center px-[35]'>
-
-                    <BoxImage width={250} height={250} img={require('assets/images/LOGOPINULITOORIGINAL.png')}/>
-                    {/* <Title>PIOAPP</Title>
-                    <TextInfo style={{ textAlign: 'justify' }}>La pioapp es una plataforma diseñada para brindarle una gestión administrativa eficiente, segura y organizada.</TextInfo> */}
-
-                    {/* <TextInfo style={{ textAlign: 'justify' }}>La pioapp es una plataforma diseñada para brindarle una gestión administrativa eficiente, segura y organizada. Nuestro objetivo es facilitar sus procesos y optimizar la toma de decisiones.</TextInfo>
-                    
-                    <View className='flex flex-col w-full flex-wrap gap-2'>
-
-                        { 
-                            (bottomNavigation.slice(1, 4) ?? []).map( (el, i) => (
-                                <CardTitle 
-                                    key={i} 
-                                    style={{ width:'100%' }} 
-                                    icon={el.focusedIcon} 
-                                    title={el.title}
-                                    onPress={ () => NavigationService.reset('Home', { keyIndex: el.key }) }
-                                />
-                            )) 
-                        }
-                        
-                    </View> */}
+                <View className='w-full mt-2 flex flex-col flex-1 px-[10]'>
+                    {/* Loading State or Dashboard News Feed Vertical */}
+                    {isLoadingDashboard ? (
+                        <SkeletonPublicaciones />
+                    ) : (
+                        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}>
+                            {dashboardFeeds.length === 0 ? (
+                                <View className="flex-col items-center justify-center mt-10 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+                                    <Text variant="titleMedium" className="font-bold text-center text-gray-700 mb-2">
+                                        ¡Estás al día! 🎉
+                                    </Text>
+                                    <Text variant="bodyMedium" className="text-center text-gray-500 mb-6">
+                                        Has revisado todos tus avisos y comunicados pendientes.
+                                    </Text>
+                                    <Button 
+                                        mode="contained" 
+                                        icon="history" 
+                                        className="rounded-full w-full"
+                                        onPress={() => NavigationService.navigate('HistorialPublicaciones')}
+                                    >
+                                        Ver Historial de Avisos
+                                    </Button>
+                                </View>
+                            ) : (
+                                <View className='w-full'>
+                                    {dashboardFeeds.map(pub => (
+                                        <View key={pub.id_publicacion} className="mb-4">
+                                            <CardPublicacion publicacion={pub} />
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+                        </ScrollView>
+                    )}
                 </View>
 
             {/* </ScrollViewContainer> */}

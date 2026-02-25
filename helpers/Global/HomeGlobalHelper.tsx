@@ -9,6 +9,13 @@ export function orderRoutersMenu(resultPermisos:PermissionMenuType[]) {
       const routerData = router ? { ...router, name_category: el.name_category } : null
       routerData && arrayRouter.push(routerData)
   })
+
+  // Inyectar manualmente 'HistorialPublicaciones' bajo 'Módulos' si está disponible en routers
+  const historialRouter = routers.find(r => r.name === 'HistorialPublicaciones');
+  if (historialRouter) {
+      arrayRouter.push({ ...historialRouter, name_category: 'Módulos' });
+  }
+
   const dataGroupedRouter = groupByField(arrayRouter, 'name_category')
   return dataGroupedRouter
 }

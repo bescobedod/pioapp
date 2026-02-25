@@ -20,6 +20,7 @@ import ListNotification from "pages/Notifications/ListNotification"
 import PersonalUser from "pages/PersonalUser/PersonalUser"
 import DevolucionesListadoPage from "pages/DevolucionesListado/DevolucionesListadoPage"
 import DevolucionCreacionPage from "pages/DevolucionCreacion/DevolucionCreacionPage"
+import HistorialPublicacionesScreen from "pages/dashboard/HistorialPublicacionesScreen"
 
 type RoutersType = {
     name: string;
@@ -198,6 +199,14 @@ const routers = [
         hidden: true,
         icon: '',
         title: 'Nueva Devolucion'
+    },
+    {
+        name: 'HistorialPublicaciones',
+        component: HistorialPublicacionesScreen,
+        default: false,
+        hidden: false,
+        icon: 'newspaper-variant-multiple',
+        title: 'Publicaciones'
     }
 ] as const satisfies readonly RoutersType[]
 

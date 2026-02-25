@@ -158,7 +158,7 @@ export default function PersonalUser() {
                 handleLinkMicrosoftAccount(code);
             }
         } else if (msResponse?.type === 'error') {
-            console.log(msResponse);
+            //console.log(msResponse);
             openVisibleSnackBar('Error al vincular cuenta de Microsoft', 'error');
         }
     }, [msResponse]);

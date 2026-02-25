@@ -4,7 +4,7 @@ import { makeRedirectUri, exchangeCodeAsync } from 'expo-auth-session';
 import { URLPIOAPP } from '../http/ajax'; // Or adjust path as needed depending on where this is placed
 import * as Linking from 'expo-linking';
 
-console.log("Linking.createURL('auth')", Linking.createURL('auth'));
+//console.log("Linking.createURL('auth')", Linking.createURL('auth'));
 
 // Permite a AuthSession saber si el navegador se abrió para terminar la sesión
 WebBrowser.maybeCompleteAuthSession();
