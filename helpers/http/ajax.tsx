@@ -7,6 +7,9 @@ import { UserSessionType } from "types/auth/UserSessionType";
 import { AuthHedearsType } from "types/Request/AuthorizationTypes";
 import MethodRequestType from "types/Request/MethodRequestType";
 
+export const URLDIVIDENDOS = `http://3.22.33.142/`
+// export const URLDIVIDENDOS = `http://sistema.grupopinulito.com:81`
+
 //export const URLPIOAPP = `http://192.168.0.153:5001/api`
 
 //local pruva PORT

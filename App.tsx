@@ -21,6 +21,7 @@ import { generateJsonError, ResponseService } from 'types/RequestType';
 import { AJAX, URLPIOAPP } from 'helpers/http/ajax';
 import AppInitTransition from 'components/Animaciones/AppInitTransition';
 import { configureNotificationHandler } from 'helpers/Notification/NotificationPushHelper';
+import LoadingScreenAll from 'components/Screens/LoadingScreenAll';
 
 configureNotificationHandler()
 
@@ -85,6 +86,8 @@ export default function App() {
             <LoadingScreen/>
             {/* snackbar alerts global */}
             <SnackBarAlert/>
+            {/* screen loading */}
+            <LoadingScreenAll/>
 
             <StackNavigatorApp initialRouteName={routerInit}/>
           </PaperProvider>
