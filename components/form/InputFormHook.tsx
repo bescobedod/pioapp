@@ -62,7 +62,8 @@ export default function InputFormHook({
                       mode="flat"
                       label={label}
                       placeholder={placeholder}
-                      value={value ?? ""}
+                    //   value={value ?? ""}
+                      value={String(value ?? "")}
                       onChangeText={onChange}
                       onBlur={onBlur}
                       secureTextEntry={viewPassword}

@@ -10,7 +10,7 @@ import alertsState from "helpers/states/alertsState";
 import videografyState from "helpers/states/videografyState";
 import TouchRipple from "components/Touch/TouchRipple";
 import { AppTheme } from "types/ThemeTypes";
-import { openCameraVideo } from "helpers/video/VideoHelper";
+import { compressVideo, openCameraVideo } from "helpers/video/VideoHelper";
 
 type PickerVideoProps = {
     disabled?: boolean;
@@ -62,8 +62,11 @@ export default function PickerVideo({
             if(location) {
                 resultLocation = await getLocation()
             }
+            openVisibleSnackBar(`Optimizando video.`, 'normal')
+            const resultOptimizadedVideoUri = await compressVideo(resultVideo.uri)
             setMetadatosVideo(
-                resultVideo.uri,
+                // resultVideo.uri,
+                resultOptimizadedVideoUri,
                 resultVideo.exif || null,
                 resultLocation?.coords || null,
                 resultVideo.mimeType || "video/mp4",

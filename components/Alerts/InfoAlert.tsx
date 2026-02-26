@@ -1,5 +1,6 @@
 import { StyleProp, View, ViewStyle } from "react-native"
 import { Text, useTheme, IconButton } from "react-native-paper"
+import { AppTheme } from "types/ThemeTypes";
 
 type InfoAlertType = {
     label?: string;
@@ -13,7 +14,7 @@ export default function InfoAlert({
 } : InfoAlertType)
 {
 
-    const theme = useTheme()
+    const theme = useTheme() as AppTheme
 
     return (
         <View style={[styleContent]} className="flex-row gap-1 items-center">
