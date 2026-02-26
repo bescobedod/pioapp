@@ -187,7 +187,7 @@ const routers = [
         name: 'DevolucionListado',
         component: DevolucionesListadoPage,
         default: false,
-        hidden: false,
+        hidden: true,
         icon: 'package-variant-closed',
         title: 'Devoluciones'
     },
@@ -195,9 +195,9 @@ const routers = [
         name: 'DevolucionCreacion',
         component: DevolucionCreacionPage,
         default: false,
-        hidden: true,
-        icon: '',
-        title: 'Nueva Devolucion'
+        hidden: false,
+        icon: 'package-variant-closed',
+        title: 'Devoluciones'
     }
 ] as const satisfies readonly RoutersType[]
 
