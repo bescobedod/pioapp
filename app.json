@@ -2,6 +2,7 @@
   "expo": {
     "name": "pioapp",
     "slug": "pioapp",
+    "scheme": "pioapp",
     "version": "1.0.5",
     "web": {
       "favicon": "./assets/images/LOGOPINULITO.png",
@@ -28,7 +29,8 @@
       ],
       "expo-notifications",
       "@react-native-firebase/app",
-      "expo-video"
+      "expo-video",
+      "expo-web-browser"
     ],
     "orientation": "portrait",
     "icon": "./assets/images/LOGOPINULITO.png",
@@ -67,6 +69,21 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "pioapp",
+              "host": "auth"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ]
     },
     "extra": {

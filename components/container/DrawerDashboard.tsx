@@ -12,6 +12,8 @@ import menuRouterState, { RouterGrouped } from 'helpers/states/menuRouterState';
 import { currentRouteName, NavigationService } from 'helpers/navigator/navigationScreens';
 import TouchRipple from 'components/Touch/TouchRipple';
 import DrawerSkeleton from 'components/Skeletons/DrawerSkeleton';
+import AvatarImage from 'components/Avatars/AvatarImage';
+import { DEFAULT_USER } from 'assets/Providers/ImageProvider';
 // import { useRoute } from '@react-navigation/native';
 
 export default function DrawerDashboard () {
@@ -72,7 +74,10 @@ export default function DrawerDashboard () {
                   setTimeout(() => NavigationService.navigate("PersonalUser"), 200)
                 }}>
                   <View className='w-full flex flex-row gap-4 items-center py-[30] px-[25]'>
-                      <Avatar.Image size={50} source={require('assets/images/default-user.jpg')} />
+                      <AvatarImage 
+                          size={50} 
+                          img={userSession?.image_profile ? { uri: userSession.image_profile } : DEFAULT_USER} 
+                      />
                       <View className='flex-1'>
                           <Text variant='bodyLarge'>{ `${userSession?.first_name || ''} ${userSession?.first_last_name || ''}` }</Text>
                           <Text variant='bodySmall' style={{ color: theme.colors.primary }}>{ userSession?.puesto_trabajo || ' -- ' }</Text>
