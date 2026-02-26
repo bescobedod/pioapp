@@ -191,7 +191,7 @@ const routers = [
     default: false,
     hidden: true,
     icon: 'package-variant-closed',
-    title: 'Devoluciones',
+    title: 'Devoluciones', 
   },
   {
     name: 'DevolucionCreacion',
