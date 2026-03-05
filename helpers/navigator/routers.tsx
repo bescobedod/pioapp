@@ -3,25 +3,26 @@ import UserDeactivated from 'pages/auth/UserDeactivated';
 import FirstTimePassword from 'pages/auth/FirstTimePassword';
 import ForgotPassword from 'pages/auth/ForgotPassword';
 // import Inicio from "pages/dashboard/Inicio"
-import SaveVisitas from 'pages/Fomularios/SaveVisitas';
-import ScannnerQr from 'pages/dashboard/ScannnerQr';
-import Home from 'pages/dashboard/Home';
-import Rutas from 'pages/dashboard/Rutas';
-import Boleta from 'pages/dashboard/Boleta';
-import ShowQrRuta from 'pages/dashboard/ShowQrRuta';
-import RecepcionRutas from 'pages/dashboard/RecepcionRutas';
+import SaveVisitas from 'pages/Visitas/GuardarVisita/SaveVisitas';
+import ScannnerQr from 'pages/Features/ScannerQr/ScannnerQr';
+import Home from 'pages/Inicio';
+import Rutas from 'pages/Rutas/Rutas';
+import Boleta from 'pages/Boleta/Boleta';
+import ShowQrRuta from 'pages/Rutas/MostrarQr/ShowQrRuta';
+import RecepcionRutas from 'pages/Rutas/Recepcion/RecepcionRutas';
 import Marcaje from 'pages/auth/Marcaje';
-import FailConnectInternet from 'pages/network/FailConnectInternet';
-import ConvivioInvitacion from 'pages/dashboard/ConvivioInvitacion';
-import NominaConvivio from 'pages/dashboard/NominaConvivio';
-import CrearQrConvivio from 'pages/dashboard/NominaConvivio/CrearQrConvivio';
-import CrearProductoConvivio from 'pages/dashboard/NominaConvivio/CrearProductoConvivio';
-import ListNotification from 'pages/Notifications/ListNotification';
-import PersonalUser from 'pages/PersonalUser/PersonalUser';
-import DevolucionesListadoPage from 'pages/DevolucionesListado/DevolucionesListadoPage';
-import DevolucionCreacionPage from 'pages/DevolucionCreacion/DevolucionCreacionPage';
-import HistorialPublicacionesScreen from 'pages/dashboard/HistorialPublicacionesScreen';
-import PublicacionDetalleScreen from 'pages/dashboard/PublicacionDetalleScreen';
+import FailConnectInternet from 'pages/Features/Conexion/FailConnectInternet';
+import ConvivioInvitacion from 'pages/Convivio/Invitacion/ConvivioInvitacion';
+import NominaConvivio from 'pages/Convivio/NominaConvivio/NominaConvivio';
+import CrearQrConvivio from 'pages/Convivio/NominaConvivio/CrearQrConvivio/CrearQrConvivio';
+import CrearProductoConvivio from 'pages/Convivio/NominaConvivio/CrearProductoConvivio/CrearProductoConvivio';
+import ListNotification from 'pages/Notificaciones/ListNotification';
+import PersonalUser from 'pages/Perfil/PersonalUser';
+import DevolucionesListadoPage from 'pages/Rutas/Devolucion/DevolucionesListado/DevolucionesListadoPage';
+import DevolucionCreacionPage from 'pages/Rutas/Devolucion/DevolucionCreacion/DevolucionCreacionPage';
+import HistorialPublicacionesScreen from 'pages/Publicaciones/HistorialPublicacionesScreen';
+import PublicacionDetalleScreen from 'pages/Publicaciones/PublicacionDetalleScreen';
+import DevolucionDetallePage from 'pages/Rutas/Devolucion/DevolucionDetalle/DevolucionDetallePage';
 
 type RoutersType = {
   name: string;
@@ -189,9 +190,9 @@ const routers = [
     name: 'DevolucionListado',
     component: DevolucionesListadoPage,
     default: false,
-    hidden: true,
+    hidden: false,
     icon: 'package-variant-closed',
-    title: 'Devoluciones', 
+    title: 'Historial',
   },
   {
     name: 'DevolucionCreacion',
@@ -199,7 +200,7 @@ const routers = [
     default: false,
     hidden: false,
     icon: 'package-variant-closed',
-    title: 'Devoluciones',
+    title: 'Crear Devolución',
   },
   {
     name: 'HistorialPublicaciones',
@@ -216,6 +217,14 @@ const routers = [
     hidden: true,
     icon: '',
     title: 'Detalle Publicación',
+  },
+  {
+    name: 'DevolucionDetalle',
+    component: DevolucionDetallePage,
+    default: false,
+    hidden: true,
+    icon: '',
+    title: 'Detalle de Devolución',
   },
 ] as const satisfies readonly RoutersType[];
 
