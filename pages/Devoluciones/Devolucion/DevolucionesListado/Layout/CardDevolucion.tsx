@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Surface, Text, Button, useTheme } from 'react-native-paper';
+import { Surface, Text, Button, Icon, useTheme } from 'react-native-paper';
 import moment from 'moment';
 
 interface Props {
@@ -19,14 +19,10 @@ export const getEstadoColor = (estado: string, fallbackColor: string) => {
 export default function CardDevolucion({ devolucion, onPress }: Props) {
   const theme = useTheme();
   const tagColor = getEstadoColor(devolucion.estado || '', theme.colors.primary);
+  const totalProductos = devolucion.total_productos ?? devolucion.totalProductos ?? null;
 
   return (
-    <Surface
-      className="mb-3 overflow-hidden rounded-xl"
-      style={{
-        borderTopWidth: 5,
-        borderTopColor: tagColor,
-      }}>
+    <Surface className="m-2 overflow-hidden rounded-xl">
       <View className="flex-row items-center justify-between p-4 pb-2">
         <View style={{ backgroundColor: `${tagColor}20` }} className="rounded-full px-3 py-1">
           <Text style={{ color: tagColor, fontWeight: 'bold', fontSize: 12 }}>
@@ -34,7 +30,7 @@ export default function CardDevolucion({ devolucion, onPress }: Props) {
           </Text>
         </View>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {moment(devolucion.createdAt).format('DD/MM/YYYY')}
+          {moment(devolucion.createdAt).format('DD/MM/YYYY HH:mm')}
         </Text>
       </View>
 
@@ -46,9 +42,29 @@ export default function CardDevolucion({ devolucion, onPress }: Props) {
           style={{ color: theme.colors.onSurface }}>
           {devolucion.nombre_tienda}
         </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Recepción: {devolucion.id_recepcion || devolucion.id_devolucion}
-        </Text>
+        {devolucion.nombre_empresa && (
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 2 }}>
+            {devolucion.nombre_empresa}
+          </Text>
+        )}
+        <View className="flex-row items-center justify-between mt-1">
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Folio: #{devolucion.id_devolucion}
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Recepción: {devolucion.idEntradaInventario && devolucion.serieEntradaInventario ? `${devolucion.serieEntradaInventario}-${devolucion.idEntradaInventario}` : devolucion.id_recepcion}
+          </Text>
+        </View>
+        {totalProductos !== null && (
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 2 }}>
+            Productos: {totalProductos}
+          </Text>
+        )}
+        {devolucion.detalle && (
+          <Text variant="bodySmall" numberOfLines={1} style={{ color: theme.colors.outline, marginTop: 4, fontStyle: 'italic' }}>
+            {devolucion.detalle}
+          </Text>
+        )}
       </View>
 
       <View className="flex-row items-center justify-between p-4 pt-2">

@@ -74,13 +74,13 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AppInitTransition loading={!fontsLoaded || !validSession}>
-        <NavigationContainer 
-          ref={navigationGlobal}
-          onReady={NavigationService.updateCurrentRouteName}
-          onStateChange={NavigationService.updateCurrentRouteName}
-        >
-          <PaperProvider theme={theme}>
+      <PaperProvider theme={theme}>
+        <AppInitTransition loading={!fontsLoaded || !validSession}>
+          <NavigationContainer 
+            ref={navigationGlobal}
+            onReady={NavigationService.updateCurrentRouteName}
+            onStateChange={NavigationService.updateCurrentRouteName}
+          >
             <DrawerDashboard/>
             {/* Loading screen global */}
             <LoadingScreen/>
@@ -90,9 +90,9 @@ export default function App() {
             <LoadingScreenAll/>
 
             <StackNavigatorApp initialRouteName={routerInit}/>
-          </PaperProvider>
-        </NavigationContainer>
-      </AppInitTransition>
+          </NavigationContainer>
+        </AppInitTransition>
+      </PaperProvider>
     </GestureHandlerRootView>
   );
 }

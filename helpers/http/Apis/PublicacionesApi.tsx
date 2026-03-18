@@ -31,6 +31,11 @@ export const getPublicacionesDashboard = async (): Promise<ResponseService<Publi
   return await AJAX(`${URLPIOAPP}/publicaciones/dashboard`, 'GET');
 };
 
+// Obtener una publicación individual por ID
+export const getPublicacionById = async (id_publicacion: number): Promise<ResponseService<PublicacionType>> => {
+  return await AJAX(`${URLPIOAPP}/publicaciones/${id_publicacion}`, 'GET');
+};
+
 // Historial (todas, filtrables opcionalmente)
 export const getPublicacionesHistorial = async (
   id_categoria?: number

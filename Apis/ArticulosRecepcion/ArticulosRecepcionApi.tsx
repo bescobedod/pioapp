@@ -37,6 +37,7 @@ export const getRecepcionesValidDay = async (
       `${URLPIOAPP}/recepcion/articulos/list/recepciones/valid/day?${queryParams}`,
       'GET'
     );
+    console.log(result);
     return result;
   } catch (error) {
     alertsState.getState().openVisibleSnackBar(`${error}`, 'error');
@@ -53,6 +54,7 @@ type BodyArticulosRecepcionType = {
 export const getArticulosDevolucion = async (
   body: BodyArticulosRecepcionType
 ): Promise<DetalleEntradaInventario[]> => {
+  console.log('body', body);
   try {
     const result = await AJAX(
       `${URLDIVIDENDOS}/dividendos/services/PINULITO_PDV/Inventario/getDevolucionEntradaInventarioDetalle`,

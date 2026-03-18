@@ -20,6 +20,7 @@ import { LatLng } from "react-native-maps";
 import InfoAlert from "components/Alerts/InfoAlert";
 import ToggleContainerAnimated from "components/Animaciones/ToggleContainerAnimated";
 import ImageCarouselPortal from "components/Modals/ImageCarouselPortal";
+import { getPublicacionById, PublicacionType } from "helpers/http/Apis/PublicacionesApi";
 
 type ModalDetailNotificationType = {
     portalModal: boolean;
@@ -44,6 +45,12 @@ export default function ModalDetailNotification({
     const [archivosVisitaEmergencia, setArchivosVisitaEmergencia] = useState<ArchivosCasoType[]>([])
     //varable para controlar el open del carusel
     const [openCarouselImages, setOpenCarouselImages] = useState<boolean>(false)
+
+    // Agregados para el manejo de Publicaciones ("Nueva Publicación" id=3 aprox pero checamos conteniendo "Publica")
+    const isPublicacion = notificationSelectActual?.AsuntoNotificacionModel?.name_asunto?.toLowerCase().includes("publicaci")
+    const [loadingPublicacion, setLoadingPublicacion] = useState<boolean>(false)
+    const [publicacion, setPublicacion] = useState<PublicacionType|null>(null)
+    const idPublicacion = notificationSelectActual?.dataPayload?.id_publicacion ?? '0'
 
     //obtner la visita emregencia actual
     const getVisitaEmergencia = async() : Promise<ResponseService<ResponseVisitaEmergenciaType>> => {
@@ -115,16 +122,41 @@ export default function ModalDetailNotification({
         setLoadingTareaSupervisor(false)
     }
 
+    //FUNCION PARA CARGAR LA INFORMACION DE LA PUBLICACION
+    const handleValidPublicacion = async () => {
+        if (!idPublicacion || idPublicacion === '0') return;
+        setLoadingPublicacion(true)
+        const response = await getPublicacionById(idPublicacion)
+        if (response.status) {
+            setPublicacion(response.data as PublicacionType)
+        } else {
+            openVisibleSnackBar(`No se pudo obtener el detalle de la publicación: ${response.message ?? ''}`, 'error')
+        }
+        setLoadingPublicacion(false)
+    }
+
     const cleanHook = () => {
         setArchivosVisitaEmergencia([])
         setOpenCarouselImages(false)
+        setPublicacion(null)
     }
 
     const init = async() => {
         //limpiar hooke del componente
         cleanHook()
-        //validar si el id del asunto es igual a 2
-        isTareaSupervisor && await handleValidVisitaEmergencia()
+        //validar si el id del asunto es igual a 2 o corresponde a visistas
+        if (isTareaSupervisor) {
+            await handleValidVisitaEmergencia()
+        } else if (isPublicacion) {
+            await handleValidPublicacion()
+        }
+    }
+
+    const handleOnpressVerPublicacion = () => {
+        if (publicacion) {
+            handleCloseTogglePortalModal()
+            NavigationService.navigate('PublicacionDetalle', { publicacion })
+        }
     }
 
     useEffect(() => { init() }, [notificationSelectActual])
@@ -197,6 +229,18 @@ export default function ModalDetailNotification({
                                     />
                                 </>
                             ) 
+                        }
+
+                        {
+                            isPublicacion && (
+                                <ButtonForm 
+                                    label="Ver Detalle de Publicación" 
+                                    icon="newspaper-variant-outline" 
+                                    loading={loadingPublicacion}
+                                    disabled={loadingPublicacion || !publicacion}
+                                    onPress={handleOnpressVerPublicacion}
+                                />
+                            )
                         }
                 
                     </View>

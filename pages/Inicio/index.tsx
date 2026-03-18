@@ -28,19 +28,23 @@ export type PermissionMenuType = {
   id_rol?: number;
   id_type_menu?: number;
   name_category?: string;
+  order_category?: number;
   name_rol?: string;
   name_route?: string;
   name_type_menu?: string;
   title?: string;
+  id_menu_parent?: number;
+  order_menu?: number;
 };
 
 export default function Home() {
   const { openVisibleSnackBar } = alertsState();
-  const { setOpenScreenLoading, setCloseScreenLoading, setLoadingMenuInit } = globalState();
-  const { setRouterMenu } = menuRouterState();
+  const { setOpenScreenLoading, setCloseScreenLoading, setLoadingMenuInit, loadingMenuInit } = globalState();
+  const { setRouterMenu, setRawPermissions } = menuRouterState();
   const { dashboardFeeds, loadDashboardFeeds, isLoadingDashboard } = usePublicacionesState();
   const didInit = useRef(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasPublicationsPermission, setHasPublicationsPermission] = useState(false);
   const theme = useTheme();
   const onRefresh = async () => {
     setRefreshing(true);
@@ -65,9 +69,24 @@ export default function Home() {
     setLoadingMenuInit(true);
     // setOpenScreenLoading()
     const resultPermisos = await getMenusPermisssion();
-    const dataOrder: any = orderRoutersMenu(resultPermisos.data as PermissionMenuType[]);
+    const parsedPermissions = resultPermisos.data as PermissionMenuType[] || [];
+    
+    // Guardar permisos raw para uso en toda la app
+    setRawPermissions(parsedPermissions);
+    
+    const dataOrder: any = orderRoutersMenu(parsedPermissions);
     // console.log(dataOrder)
     setRouterMenu(dataOrder);
+    
+    // Verificar si tiene permiso para Publicaciones en Dashboard (id 13 o name_route Inicio/Publicaciones)
+    // Asumiendo que indicaste que el id_menu_app para Dashboard es 13
+    const canViewPublications = parsedPermissions.some(p => p.id_menu_app === 13);
+    setHasPublicationsPermission(canViewPublications);
+    
+    if (canViewPublications) {
+      loadDashboardFeeds();
+    }
+    
     // setCloseScreenLoading()
     setLoadingMenuInit(false);
   };
@@ -79,9 +98,12 @@ export default function Home() {
       if (!didInit.current) {
         initalize();
         didInit.current = true;
+      } else {
+        // Recargar publicaciones solo si ya fue inicializado y tiene permiso
+        if (hasPublicationsPermission) {
+          loadDashboardFeeds();
+        }
       }
-      // Recargar publicaciones cada vez que entra al Home
-      loadDashboardFeeds();
     }, [])
   );
 
@@ -99,8 +121,30 @@ export default function Home() {
 
         <View className="mt-2 flex w-full flex-1 flex-col px-[10]">
           {/* Loading State or Dashboard News Feed Vertical */}
-          {isLoadingDashboard && !refreshing ? (
+          {loadingMenuInit || (isLoadingDashboard && !refreshing) ? (
             <SkeletonPublicaciones />
+          ) : !hasPublicationsPermission ? (
+            <View className="flex-1 flex-col items-center justify-center w-full px-4">
+               <View
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outlineVariant,
+                  }}
+                  className="w-full flex-col items-center justify-center border p-8 shadow-sm rounded-2xl">
+                  <Text
+                    variant="headlineSmall"
+                    style={{ color: theme.colors.primary }}
+                    className="mb-3 font-bold text-center">
+                    ¡Bienvenido a Pinulito! 🐔
+                  </Text>
+                  <Text
+                    variant="bodyLarge"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                    className="mb-2 text-center">
+                    Selecciona una opción del menú inferior para comenzar a trabajar.
+                  </Text>
+               </View>
+            </View>
           ) : (
             <ScrollView
               showsVerticalScrollIndicator={false}
@@ -130,6 +174,8 @@ export default function Home() {
                       className="mb-8 text-center">
                       Has revisado todos tus avisos y comunicados pendientes.
                     </Text>
+                    
+                    {/* Botón condicionado al permiso de Historial (14) pero usualmente si ve inicio, ve historial. Aquí lo dejamos disponible porque si llego hasta aqui es porque tiene feed. */}
                     <Button
                       mode="contained"
                       icon="history"

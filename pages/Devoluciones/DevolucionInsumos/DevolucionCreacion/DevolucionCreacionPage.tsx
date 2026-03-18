@@ -2,8 +2,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import {
   DetalleEntradaInventario,
   EntradaInventarioType,
-  getArticulosDevolucion,
-  getRecepcionesValidDay,
 } from 'Apis/ArticulosRecepcion/ArticulosRecepcionApi';
 import { getTiendas } from 'Apis/TiendasModulo/TiendasModuloApi';
 import FormAdaptiveKeyBoard from 'components/container/FormAdaptiveKeyBoard';
@@ -34,12 +32,12 @@ import { ActivityIndicator, Icon, Text, useTheme } from 'react-native-paper';
 import Option from 'types/Dropdown/Option';
 import { AppTheme } from 'types/ThemeTypes';
 import ModalizeDevolucionArticulo from './Layout/ModalizeDevolucionArticulo';
-import { postCreateDevolucion } from 'Apis/Devolucion/DevolucionApi';
+import { getSAPRecepciones, postCreateDevolucionInsumo, PurchaseDeliveryNote, getMotivosDevolucion, MotivoDevolucionType } from 'Apis/Devolucion/DevolucionApi';
 import { NavigationService } from 'helpers/navigator/navigationScreens';
 
-export type TableDataArticulosDevolucion = DetalleEntradaInventario & { cantidadDevolver: number };
+export type TableDataArticulosDevolucion = DetalleEntradaInventario & { cantidadDevolver: number; unidadMedida?: string | null; id_devolucion_motivo?: number | null; motivo_devolucion?: string | null; };
 
-export default function DevolucionCreacionPage() {
+export default function DevolucionInsumosCreacionPage() {
   const theme = useTheme() as AppTheme;
   const {
     control,
@@ -53,14 +51,13 @@ export default function DevolucionCreacionPage() {
     mode: 'all',
     shouldUnregister: true,
   });
-  const { metadatosPicture, clearMetadatosPicture } = fotografyState();
-  const { metadatosVideo, clearMetadatosVideo } = videografyState();
   const { setOpenScreenLoading, setCloseScreenLoading } = globalState();
   const [tiendasState, setTiendasState] = useState<Option[]>([]);
   const [tiendasList, setTiendasList] = useState<any[]>([]);
   const [initLoadingPage, setInitLoadingPage] = useState<boolean>(true);
   const opacity = useRef(new Animated.Value(1)).current;
-  const [recepciones, setRecepciones] = useState<EntradaInventarioType[]>([]);
+  const [recepciones, setRecepciones] = useState<PurchaseDeliveryNote[]>([]);
+  const [motivosList, setMotivosList] = useState<Option[]>([]);
   const [loadingRecepciones, setLoadingRecepciones] = useState<boolean>(false);
   const [articulosDevolucion, setArticulosDevolucion] = useState<TableDataArticulosDevolucion[]>(
     []
@@ -73,11 +70,6 @@ export default function DevolucionCreacionPage() {
     useState<TableDataArticulosDevolucion | null>(null);
   const [loadingFormDevolucion, setLoadingFormDevolucion] = useState<boolean>(false);
 
-  const clearHook = () => {
-    clearMetadatosPicture();
-    clearMetadatosVideo();
-  };
-
   const renderTiendas = async () => {
     const listTiendas = await getTiendas();
     setTiendasList(listTiendas.data ?? []);
@@ -89,11 +81,19 @@ export default function DevolucionCreacionPage() {
     setInitLoadingPage(false);
   };
 
+  const renderMotivos = async () => {
+    const result = await getMotivosDevolucion('insumos');
+    console.log('Motivos Insumos:', result);
+    if (result.status && result.data) {
+       setMotivosList(result.data.map(m => ({ label: m.motivo, value: m.id_devolucion_motivo })));
+    }
+  };
+
   const onFocusDropdownRecepciones = async () => {
     try {
       setLoadingRecepciones(true);
       const [empresa, tienda] = valueTienda.split('-');
-      const result = await getRecepcionesValidDay({ empresa, tienda });
+      const result = await getSAPRecepciones({ empresa, tienda, tipoReclamo: 'insumos' });
       setRecepciones(result?.data ?? []);
     } catch (error) {
       openVisibleSnackBar(`${error}`, 'error');
@@ -107,14 +107,19 @@ export default function DevolucionCreacionPage() {
     try {
       setOpenScreenLoading();
       const recepcionSelect =
-        recepciones?.find((el) => el.idEntradaInventario == Number(valueRecepcion)) ?? null;
-      const result = await getArticulosDevolucion({
-        codigoPOS: `${recepcionSelect?.empresa}-${recepcionSelect?.tienda}`,
-        numero: Number(recepcionSelect?.idEntradaInventario),
-        serie: recepcionSelect?.serie ?? '',
-      });
-      console.log(result);
-      const resultMapRecepciones = result.map((el) => ({ ...el, cantidadDevolver: 0 }));
+        recepciones?.find((el) => el.DocEntry == Number(valueRecepcion)) ?? null;
+      console.log(recepcionSelect);
+      if(!recepcionSelect) return;
+      
+      const resultMapRecepciones = recepcionSelect.DocumentLines.map((el) => ({ 
+        nombreProducto: el.ItemDescription,
+        quantity: el.Quantity,
+        cantidadReal: String(el.Quantity),
+        ItemCode: el.ItemCode,
+        lienaEntradaMer: el.LineNum,
+        cantidadDevolver: 0,
+        unidadMedida: el.MeasureUnit,
+      }));
       setArticulosDevolucion(resultMapRecepciones ?? []);
     } catch (error) {
       openVisibleSnackBar(`${error}`, 'error');
@@ -123,24 +128,18 @@ export default function DevolucionCreacionPage() {
     }
   };
 
-  const editCantidadDevolverState = (cantidadDevolver: number) => {
+  const editCantidadDevolverState = (cantidadDevolver: number, id_devolucion_motivo: number, motivoName: string) => {
     if (!selectArticuloDevolucion) return;
     setArticulosDevolucion((prev) =>
       prev.map((item) =>
-        item.ItemCode === selectArticuloDevolucion.ItemCode ? { ...item, cantidadDevolver } : item
+        item.ItemCode === selectArticuloDevolucion.ItemCode ? { ...item, cantidadDevolver, id_devolucion_motivo, motivo_devolucion: motivoName } : item
       )
     );
-    setSelectArticuloDevolucion((prev) => (prev ? { ...prev, cantidadDevolver } : prev));
+    setSelectArticuloDevolucion((prev) => (prev ? { ...prev, cantidadDevolver, id_devolucion_motivo, motivo_devolucion: motivoName } : prev));
   };
 
   const onSubmitFormSaveDevolucion = async (data: schemaFormNwDevolucionesType) => {
     try {
-      const { imgUri, mimeType: mimeTypeImage, nameImg } = metadatosPicture;
-      const { videoUri, mimeType: mimeTypeVideo, fileName } = metadatosVideo;
-      if (!imgUri || !mimeTypeImage || !nameImg)
-        return openVisibleSnackBar(`Porfavor ingresa un imagen de la temperatura.`, 'warning');
-      if (!videoUri || !mimeTypeVideo || !fileName)
-        return openVisibleSnackBar(`Porfavor ingresa un video de comprobante.`, 'warning');
       const [empresa, tienda] = data.tienda.split('-');
 
       const selectedTienda = tiendasList.find(
@@ -150,27 +149,23 @@ export default function DevolucionCreacionPage() {
       const articulosDevolucionValid = articulosDevolucion.filter(
         (el) => Number(el?.cantidadDevolver ?? 0) > 0
       );
+      const recepcionSeleccionada = recepciones.find((el) => el.DocEntry === Number(data.recepcion));
+      let idEntradaFinal: number | string = data.recepcion;
+      if (recepcionSeleccionada && recepcionSeleccionada.U_NDGFACE && !isNaN(Number(recepcionSeleccionada.U_NDGFACE))) {
+        idEntradaFinal = Number(recepcionSeleccionada.U_NDGFACE);
+      }
+
       const bodyFormData = {
         empresa,
         tienda,
         nombre_empresa: selectedTienda?.nombre_empresa ?? '',
         nombre_tienda: selectedTienda?.nombre_tienda ?? '',
         detalle: data.detalle,
-        idEntradaInventario: data.recepcion,
+        idEntradaInventario: Number(idEntradaFinal),
         detalle_devolucion: JSON.stringify(articulosDevolucionValid),
-        foto_temperatura: {
-          uri: imgUri,
-          type: mimeTypeImage,
-          name: nameImg,
-        },
-        video_comprobante: {
-          uri: videoUri,
-          type: mimeTypeVideo,
-          name: fileName,
-        },
       };
       setLoadingFormDevolucion(true);
-      const result = await postCreateDevolucion(bodyFormData);
+      const result = await postCreateDevolucionInsumo(bodyFormData);
       if (result.status) {
         openVisibleSnackBar(`${result?.message ?? 'Devolucion creada correctamente.'}`, 'success');
         NavigationService.reset('Home');
@@ -183,12 +178,8 @@ export default function DevolucionCreacionPage() {
   };
 
   useEffect(() => {
-    clearHook();
-    return clearHook();
-  }, []);
-
-  useEffect(() => {
     renderTiendas();
+    renderMotivos();
   }, []);
 
   useEffect(() => {
@@ -231,6 +222,7 @@ export default function DevolucionCreacionPage() {
       <ModalizeDevolucionArticulo
         modalizeRefDevolucionArticulo={modalizeRefDevolucionArticulo}
         selectArticuloDevolucion={selectArticuloDevolucion}
+        motivosDropdown={motivosList}
         editCantidadDevolverState={editCantidadDevolverState}
       />
 
@@ -252,8 +244,8 @@ export default function DevolucionCreacionPage() {
                   label="Recepciones"
                   onFocus={onFocusDropdownRecepciones}
                   data={recepciones.map((el) => ({
-                    label: `${el.title_resumen}`,
-                    value: el.idEntradaInventario,
+                    label: `${el.Comments || 'Doc ' + el.DocNum}`,
+                    value: el.DocEntry,
                   }))}
                   control={control}
                   name="recepcion"
@@ -267,110 +259,72 @@ export default function DevolucionCreacionPage() {
                   description="Ingresa las cantidades que quieres dar de baja."
                   descriptionNumberOfLines={0}
                 />
-                <DataTableInfo
-                  data={articulosDevolucion}
-                  configTable={[
-                    {
-                      data: null,
-                      name: 'Producto',
-                      render: (data: TableDataArticulosDevolucion) => (
-                        <View className="flex w-full flex-col items-start">
-                          <Text numberOfLines={0}>{data.nombreProducto}</Text>
-                        </View>
-                      ),
-                    },
-                    {
-                      numericHeader: true,
-                      numeric: true,
-                      data: 'cantidadReal',
-                      name: 'cantidad',
-                    },
-                    {
-                      numeric: true,
-                      numericHeader: true,
-                      data: null,
-                      name: 'Devolver',
-                      render: (data: TableDataArticulosDevolucion) => {
-                        const cantidadDevolver = Number(data?.cantidadDevolver ?? 0);
-                        return (
-                          <View className="flex-row items-center gap-1">
-                            <Text
-                              style={{
-                                ...(cantidadDevolver > 0 ? { color: theme.colors.error } : {}),
-                              }}>
-                              {cantidadDevolver > 0 ? `-${cantidadDevolver}` : cantidadDevolver}
-                            </Text>
-                            <IconButtomForm
+                <View className="flex w-full flex-col gap-4">
+                  {articulosDevolucion.map((item, index) => {
+                    const isReturning = Number(item.cantidadDevolver) > 0;
+                    return (
+                      <View
+                        key={`articulo-${item.ItemCode}-${index}`}
+                        style={{
+                          backgroundColor: theme.colors.surface,
+                          borderColor: isReturning ? theme.colors.error : theme.colors.outlineVariant,
+                          borderWidth: isReturning ? 1.5 : 1,
+                        }}
+                        className="flex-col rounded-2xl p-4 shadow-sm w-full">
+                        <View className="flex-row items-start justify-between mb-2">
+                           <View className="flex-1 pr-2">
+                              <Text style={{ color: theme.colors.onSurface }} className="font-bold text-base mb-1">
+                                {item.nombreProducto}
+                              </Text>
+                              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                                Código: {item.ItemCode} • Ud: {item.unidadMedida || '-'}
+                              </Text>
+                           </View>
+                           <IconButtomForm
                               icon="pencil"
                               disabled={loadingFormDevolucion}
-                              // loading={loadingFormDevolucion}
                               onPress={() => {
-                                setSelectArticuloDevolucion({ ...data });
+                                setSelectArticuloDevolucion({ ...item });
                                 onOpenModalize(modalizeRefDevolucionArticulo);
                               }}
                             />
-                          </View>
-                        );
-                      },
-                    },
-                  ]}
-                />
-
-                <ListItemComponent
-                  titleStyle={{ color: theme.colors.primary }}
-                  title="FOTOGRAFIA TEMPERATURA"
-                  description="Porfavor toma una fotografia clara de la temperatura."
-                  descriptionNumberOfLines={0}
-                />
-                <PickerFile location={false} disabled={loadingFormDevolucion} />
-                <ListItemComponent
-                  titleStyle={{ color: theme.colors.primary }}
-                  title="VIDEO COMPROBANTE"
-                  description="Porfavor captura un video de comprobante de baja y que cumpla los siguientes requisitos:"
-                  descriptionNumberOfLines={0}
-                />
-                <ListRender
-                  titleSubheader={''}
-                  items={[
-                    {
-                      title: 'Indicar tienda',
-                      left(props) {
-                        return <Icon source="circle-small" size={20} />;
-                      },
-                    },
-                    {
-                      title: 'Fecha de reclamo',
-                      left(props) {
-                        return <Icon source="circle-small" size={20} />;
-                      },
-                    },
-                    {
-                      title: 'Color de cinta',
-                      left(props) {
-                        return <Icon source="circle-small" size={20} />;
-                      },
-                    },
-                    {
-                      title: 'Motivo',
-                      left(props) {
-                        return <Icon source="circle-small" size={20} />;
-                      },
-                    },
-                    {
-                      title: 'Video claro',
-                      left(props) {
-                        return <Icon source="circle-small" size={20} />;
-                      },
-                    },
-                    {
-                      title: 'Pesas en buen estado',
-                      left(props) {
-                        return <Icon source="circle-small" size={20} />;
-                      },
-                    },
-                  ]}
-                />
-                <PickerVideo location={false} disabled={loadingFormDevolucion} />
+                        </View>
+                        
+                        <View className="flex-row items-center justify-between mt-2 pt-3 border-t border-gray-100">
+                           <View className="flex-col">
+                             <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                               Recepcionado
+                             </Text>
+                             <Text style={{ color: theme.colors.onSurface }} className="font-bold">
+                               {item.cantidadReal}
+                             </Text>
+                           </View>
+                           <View className="flex-col items-center">
+                             <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                               A Devolver
+                             </Text>
+                             <Text 
+                                style={{ color: isReturning ? theme.colors.error : theme.colors.onSurface }} 
+                                className="font-bold">
+                               {isReturning ? `-${item.cantidadDevolver}` : '0'}
+                             </Text>
+                           </View>
+                           <View className="flex-col items-end flex-1 max-w-[40%]">
+                             <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                               Motivo
+                             </Text>
+                             <Text 
+                                style={{ color: isReturning ? theme.colors.error : theme.colors.onSurfaceVariant }} 
+                                className="font-bold text-right"
+                                numberOfLines={1}>
+                               {isReturning && item.motivo_devolucion ? item.motivo_devolucion : '-'}
+                             </Text>
+                           </View>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
 
                 <ListItemComponent
                   titleStyle={{ color: theme.colors.primary }}

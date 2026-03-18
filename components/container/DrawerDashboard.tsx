@@ -105,67 +105,63 @@ export default function DrawerDashboard() {
                 <DrawerSkeleton />
               ) : (
                 <>
-                  {Object.entries(routerMenu as RouterGrouped).map(([key, value], index) => (
+                  {Object.entries(routerMenu as RouterGrouped)
+                    .sort((a, b) => {
+                       const orderA = a[1][0]?.order_category || 0;
+                       const orderB = b[1][0]?.order_category || 0;
+                       return orderA - orderB;
+                    })
+                    .filter(([key, value]) => {
+                       const parentItems = value.filter((el) => !el.id_menu_parent);
+                       return parentItems.some((parentEl) => {
+                          const children = value.filter((el) => el.id_menu_parent === parentEl.id_menu_app);
+                          if (children.length > 0) return true;
+                          if ((parentEl as any).isGroup || !parentEl.name) return false;
+                          return true;
+                       });
+                    })
+                    .map(([key, value], index) => (
                     <Drawer.Section key={index} className="w-full" title={key}>
-                      {Object.entries(
-                        value.reduce(
-                          (acc, el) => {
-                            // Agrupar 'DevolucionCreacion' y 'DevolucionListado' bajo 'Devoluciones'
-                            if (el.name.startsWith('Devolucion')) {
-                              if (!acc['Devoluciones']) acc['Devoluciones'] = [];
-                              acc['Devoluciones'].push(el);
-                            } else {
-                              acc[el.name] = [el];
-                            }
-                            return acc;
-                          },
-                          {} as Record<string, typeof value>
-                        )
-                      ).map(([subKey, subItems], i) => {
-                        // Si es el grupo 'Devoluciones' y tiene elementos, pintamos un Accordion
-                        if (subKey === 'Devoluciones' && subItems.length > 0) {
-                          return (
-                            <List.Accordion
-                              key={`accordion-${i}`}
-                              title="Devoluciones"
-                              left={(props) => (
-                                <List.Icon {...props} icon="package-variant-closed" />
-                              )}
-                              style={{ paddingVertical: 0 }}>
-                              {subItems.map((elRouter, j) => (
-                                <Drawer.Item
-                                  key={`sub-${j}`}
-                                  label={elRouter?.title || ''}
-                                  icon={elRouter?.icon}
-                                  disabled={elRouter.name === currentRouteName}
-                                  active={elRouter.name === currentRouteName}
-                                  style={{ paddingLeft: 40 }}
-                                  onPress={() => {
-                                    setCloseDrawer();
-                                    setTimeout(() => NavigationService.replace(elRouter.name), 200);
-                                  }}
-                                />
-                              ))}
-                            </List.Accordion>
-                          );
-                        }
+                      {(() => {
+                        // Buscar elementos principales (que no tienen padre)
+                        const parentItems = value.filter((el) => !el.id_menu_parent);
 
-                        // Si no es un grupo, pintamos el Drawer.Item normal
-                        const elRouter = subItems[0];
-                        return (
-                          <Drawer.Item
-                            key={i}
-                            label={elRouter?.title || ''}
-                            icon={elRouter?.icon}
-                            disabled={elRouter.name === currentRouteName}
-                            active={elRouter.name === currentRouteName}
-                            onPress={() => {
-                              setCloseDrawer();
-                              setTimeout(() => NavigationService.replace(elRouter.name), 200);
-                            }}
-                          />
-                        );
-                      })}
+                        return parentItems.map((parentEl, i) => {
+                          // Buscar hijos de este elemento
+                          const children = value.filter((el) => el.id_menu_parent === parentEl.id_menu_app);
+
+                          // Si tiene hijos, se renderiza un List.Accordion
+// ... (Keep existing layout up to parent menu rendering)
+                          if (children.length > 0) {
+                            return (
+                              <DrawerAccordionItem
+                                key={`accordion-${parentEl.id_menu_app || i}`}
+                                parentEl={parentEl}
+                                childrenItems={children}
+                                currentRouteName={currentRouteName}
+                                setCloseDrawer={setCloseDrawer}
+                                i={i}
+                              />
+                            );
+                          }
+
+                          // Si NO tiene hijos, es una opción regular navegable
+                          if ((parentEl as any).isGroup || !parentEl.name) return null; // No renderizar carpetas vacías sin hijos o padres inhabilitados
+                          return (
+                            <Drawer.Item
+                              key={`item-${parentEl.id_menu_app || i}`}
+                              label={parentEl?.title || ''}
+                              icon={parentEl?.icon}
+                              disabled={parentEl.name === currentRouteName}
+                              active={parentEl.name === currentRouteName}
+                              onPress={() => {
+                                setCloseDrawer();
+                                setTimeout(() => NavigationService.replace(parentEl.name), 200);
+                              }}
+                            />
+                          );
+                        });
+                      })()}
                     </Drawer.Section>
                   ))}
                 </>
@@ -174,11 +170,21 @@ export default function DrawerDashboard() {
           </View>
         </View>
         <View className="w-full px-[25] py-[30]">
+          {userSession?.id_rol === 5 && (
+            <ButtonForm
+              onPress={() => {
+                setCloseDrawer();
+                setTimeout(() => NavigationService.navigate('AdminPermisosMenu'), 200);
+              }}
+              icon="shield-account"
+              label="Configurar Permisos"
+              style={{ marginBottom: 16 }}
+            />
+          )}
           <ButtonForm
             onPress={() => {
               setCloseDrawer();
               logout(false);
-              // setTimeout(() => NavigationService.reset('Login'), 200)
             }}
             icon="logout"
             label="Cerrar sesion"
@@ -193,7 +199,6 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 9999,
-    // flex: 1,
   },
   drawer: {
     position: 'absolute',
@@ -201,8 +206,6 @@ const styles = StyleSheet.create({
     top: 0,
     width: '75%',
     height: '100%',
-    // paddingHorizontal: 25,
-    // paddingVertical: 30,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -212,3 +215,41 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });
+
+function DrawerAccordionItem({ parentEl, childrenItems, currentRouteName, setCloseDrawer, i }: any) {
+  const theme = useTheme();
+  const validChildren = childrenItems.filter((c: any) => !!c.name);
+  if (validChildren.length === 0) return null; // Prevent showing an empty accordion if all children are hidden/empty routes
+  
+  const isChildActive = validChildren.some((c: any) => c.name === currentRouteName);
+  const [expanded, setExpanded] = useState<boolean>(isChildActive);
+  
+  return (
+    <List.Accordion
+      expanded={expanded}
+      onPress={() => setExpanded(!expanded)}
+      title={parentEl.title || 'Submenú'}
+      titleStyle={{ fontWeight: "500", fontSize: 14, marginLeft: -2, letterSpacing: 0.1, color: theme.colors.onSurfaceVariant }}
+      left={(props) => (
+        <List.Icon {...props} icon={parentEl.icon || "folder-outline"} color={theme.colors.onSurfaceVariant} style={{ marginLeft: 0, marginRight: 0 }} />
+      )}
+      style={{ paddingVertical: 1, paddingHorizontal: 18, marginHorizontal: 12 }}>
+      {validChildren.map((childRouter: any, j: number) => (
+        <Drawer.Item
+          key={`sub-${childRouter.id_menu_app || j}`}
+          label={childRouter?.title || ''}
+          icon={childRouter.icon || 'circle-small'}
+          disabled={childRouter.name === currentRouteName}
+          active={childRouter.name === currentRouteName}
+          style={{ paddingLeft: 40 }}
+          onPress={() => {
+            setCloseDrawer();
+            if (childRouter.name) {
+              setTimeout(() => NavigationService.replace(childRouter.name), 200);
+            }
+          }}
+        />
+      ))}
+    </List.Accordion>
+  );
+}

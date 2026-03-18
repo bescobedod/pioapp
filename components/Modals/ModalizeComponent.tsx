@@ -42,7 +42,8 @@ export default function ModalizeComponent({
                 handlePosition='inside'
                 ref={modalizeRef}
                 onOpen={onOpen}
-                modalHeight={height * heightModalizeSreen}
+                adjustToContentHeight={true}
+                //modalHeight={height * heightModalizeSreen}
                 modalStyle={{ backgroundColor: theme.colors.background }}
                 handleStyle={{ backgroundColor: theme.colors.outline }}
                 scrollViewProps={{ 

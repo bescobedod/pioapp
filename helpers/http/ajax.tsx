@@ -10,20 +10,20 @@ import MethodRequestType from 'types/Request/MethodRequestType';
 export const URLDIVIDENDOS = `http://3.22.33.142`;
 // export const URLDIVIDENDOS = `http://sistema.grupopinulito.com:81`
 
-export const URLPIOAPP = `http://192.168.0.153:5001/api`;
+// export const URLPIOAPP = `https://kevin-unrelegated-ramon.ngrok-free.dev/api`;
 
 //local pruva PORT
 // export const URLPIOAPP = `http://10.0.2.2:5000/api`
 // export const URLPIOAPP = `https://5ddd8gl6-5001.use2.devtunnels.ms/api`;
 
 //Produccion
-// export const URLPIOAPP = `https://services.sistemaspinulito.com/pioapi`
+export const URLPIOAPP = `https://services.sistemaspinulito.com/pioapi`
 
 //variables para authentication con basic auth
-// export const BASIC_AUTH_USERNAME = process.env.EXPO_PUBLIC_BASIC_AUTH_USERNAME
-// export const BASIC_AUTH_PASSWORD = process.env.EXPO_PUBLIC_BASIC_AUTH_PASSWORD
-export const BASIC_AUTH_USERNAME = 'pioapp';
-export const BASIC_AUTH_PASSWORD = 'Pioapp12200107!';
+export const BASIC_AUTH_USERNAME = process.env.EXPO_PUBLIC_BASIC_AUTH_USERNAME
+export const BASIC_AUTH_PASSWORD = process.env.EXPO_PUBLIC_BASIC_AUTH_PASSWORD
+// export const BASIC_AUTH_USERNAME = 'pioapp';
+// export const BASIC_AUTH_PASSWORD = 'Pioapp12200107!';
 
 export const timeout = function (s: number) {
   return new Promise(function (_, reject) {
@@ -120,7 +120,11 @@ export async function AJAX(
 
 export const FormDataGenerate = (data: object) => {
   const formData = new FormData();
-  Object.entries(data).forEach(([key, value]) => formData.append(`${key}`, value));
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      formData.append(`${key}`, value);
+    }
+  });
   return formData;
 };
 

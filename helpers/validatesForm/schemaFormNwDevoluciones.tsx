@@ -5,6 +5,7 @@ const schemaFormNwDevoluciones = Yup.object({
   tienda: Yup.string().required('El campo tienda es obligatorio.'),
   recepcion: Yup.string().required('El campo recepcion es obligatorio.'),
   detalle: Yup.string().required('El campo detalle es obligatorio para describir la baja.'),
+  tipo_balanza: Yup.string().optional().default('digital'),
 }).required();
 
 export type schemaFormNwDevolucionesType = Yup.InferType<typeof schemaFormNwDevoluciones>;
