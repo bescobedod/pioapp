@@ -3,6 +3,7 @@ import { TableDataArticulosDevolucion } from "../DevolucionCreacionPage";
 import FormAdaptiveKeyBoard from "components/container/FormAdaptiveKeyBoard";
 import { View } from "react-native";
 import InputFormHook from "components/form/InputFormHook";
+import DropdownForm from "components/form/DropdownForm";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ButtonForm from "components/form/ButtonForm";
@@ -16,12 +17,14 @@ import { onCloseModalize } from "helpers/Modalize/ModalizeHelper";
 type ModalizeDevolucionArticuloProps = {
     modalizeRefDevolucionArticulo:any;
     selectArticuloDevolucion:TableDataArticulosDevolucion|null;
-    editCantidadDevolverState: (cantidadDevolver:number) => void;
+    motivosDropdown: { label: string, value: number }[];
+    editCantidadDevolverState: (cantidadDevolver:number, id_devolucion_motivo:number, motivoName:string) => void;
 }
 
 export default function ModalizeDevolucionArticulo({
     modalizeRefDevolucionArticulo,
     selectArticuloDevolucion,
+    motivosDropdown,
     editCantidadDevolverState
 }:ModalizeDevolucionArticuloProps) {
 
@@ -35,11 +38,13 @@ export default function ModalizeDevolucionArticulo({
     const onOpenModalizeDevolucionArticulo = () => {
         if(!selectArticuloDevolucion) return
         resetField('cantidad_devolucion', { defaultValue: Number(selectArticuloDevolucion?.cantidadDevolver ?? 0) })
+        resetField('id_devolucion_motivo', { defaultValue: selectArticuloDevolucion?.id_devolucion_motivo ?? undefined })
     }
 
     const onSubmitForm = (data:schemaEditCountDevolucionType) => {
-        // console.log(data.cantidad_devolucion)
-        editCantidadDevolverState(Number(data.cantidad_devolucion))
+        const itemMotivo = motivosDropdown.find(m => m.value === data.id_devolucion_motivo);
+        const motivoName = itemMotivo ? itemMotivo.label : '';
+        editCantidadDevolverState(Number(data.cantidad_devolucion), Number(data.id_devolucion_motivo), motivoName)
         onCloseModalize(modalizeRefDevolucionArticulo)
     }
 
@@ -74,6 +79,13 @@ export default function ModalizeDevolucionArticulo({
                             errors={errors}
                             inputType="number-pad"
                             placeholder="Ingrese una cantidad"
+                        />
+                        <DropdownForm
+                            label="Motivo de devolución"
+                            data={motivosDropdown}
+                            control={control}
+                            name="id_devolucion_motivo"
+                            errors={errors}
                         />
                     </View>
                 </FormAdaptiveKeyBoard>

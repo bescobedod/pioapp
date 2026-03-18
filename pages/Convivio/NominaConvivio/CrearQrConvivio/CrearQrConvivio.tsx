@@ -13,7 +13,7 @@ import { AJAX, URLPIOAPP } from "helpers/http/ajax";
 import alertsState from "helpers/states/alertsState";
 import globalState from "helpers/states/globalState";
 import schemaGenerateQrPersonaConvivio, { schemaGenerateQrPersonaConvivioType } from "helpers/validatesForm/schemaGenerateQrPersonaConvivio";
-import ModalizeCreateInvitado from "pages/Layouts/CrearQrConvivio/ModalizeCreateInvitado";
+import ModalizeCreateInvitado from "pages/Convivio/NominaConvivio/CrearQrConvivio/Layouts/ModalizeCreateInvitado";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { View } from "react-native";

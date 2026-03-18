@@ -3,25 +3,28 @@ import UserDeactivated from 'pages/auth/UserDeactivated';
 import FirstTimePassword from 'pages/auth/FirstTimePassword';
 import ForgotPassword from 'pages/auth/ForgotPassword';
 // import Inicio from "pages/dashboard/Inicio"
-import SaveVisitas from 'pages/Fomularios/SaveVisitas';
-import ScannnerQr from 'pages/dashboard/ScannnerQr';
-import Home from 'pages/dashboard/Home';
-import Rutas from 'pages/dashboard/Rutas';
-import Boleta from 'pages/dashboard/Boleta';
-import ShowQrRuta from 'pages/dashboard/ShowQrRuta';
-import RecepcionRutas from 'pages/dashboard/RecepcionRutas';
+import SaveVisitas from 'pages/Visitas/GuardarVisita/SaveVisitas';
+import ScannnerQr from 'pages/Features/ScannerQr/ScannnerQr';
+import Home from 'pages/Inicio';
+import Rutas from 'pages/Rutas/Rutas';
+import Boleta from 'pages/Boleta/Boleta';
+import ShowQrRuta from 'pages/Rutas/MostrarQr/ShowQrRuta';
+import RecepcionRutas from 'pages/Rutas/Recepcion/RecepcionRutas';
 import Marcaje from 'pages/auth/Marcaje';
-import FailConnectInternet from 'pages/network/FailConnectInternet';
-import ConvivioInvitacion from 'pages/dashboard/ConvivioInvitacion';
-import NominaConvivio from 'pages/dashboard/NominaConvivio';
-import CrearQrConvivio from 'pages/dashboard/NominaConvivio/CrearQrConvivio';
-import CrearProductoConvivio from 'pages/dashboard/NominaConvivio/CrearProductoConvivio';
-import ListNotification from 'pages/Notifications/ListNotification';
-import PersonalUser from 'pages/PersonalUser/PersonalUser';
-import DevolucionesListadoPage from 'pages/DevolucionesListado/DevolucionesListadoPage';
-import DevolucionCreacionPage from 'pages/DevolucionCreacion/DevolucionCreacionPage';
-import HistorialPublicacionesScreen from 'pages/dashboard/HistorialPublicacionesScreen';
-import PublicacionDetalleScreen from 'pages/dashboard/PublicacionDetalleScreen';
+import FailConnectInternet from 'pages/Features/Conexion/FailConnectInternet';
+import ConvivioInvitacion from 'pages/Convivio/Invitacion/ConvivioInvitacion';
+import NominaConvivio from 'pages/Convivio/NominaConvivio/NominaConvivio';
+import CrearQrConvivio from 'pages/Convivio/NominaConvivio/CrearQrConvivio/CrearQrConvivio';
+import CrearProductoConvivio from 'pages/Convivio/NominaConvivio/CrearProductoConvivio/CrearProductoConvivio';
+import ListNotification from 'pages/Notificaciones/ListNotification';
+import PersonalUser from 'pages/Perfil/PersonalUser';
+import DevolucionesListadoPage from 'pages/Devoluciones/Devolucion/DevolucionesListado/DevolucionesListadoPage';
+import DevolucionPollosCreacionPage from 'pages/Devoluciones/DevolucionCreacion/DevolucionCreacionPage';
+import DevolucionInsumosCreacionPage from 'pages/Devoluciones/DevolucionInsumos/DevolucionCreacion/DevolucionCreacionPage';
+import HistorialPublicacionesScreen from 'pages/Publicaciones/HistorialPublicacionesScreen';
+import PublicacionDetalleScreen from 'pages/Publicaciones/PublicacionDetalleScreen';
+import DevolucionDetallePage from 'pages/Devoluciones/Devolucion/DevolucionDetalle/DevolucionDetallePage';
+import AdminPermisosMenuPage from 'pages/Admin/AdminPermisosMenuPage';
 
 type RoutersType = {
   name: string;
@@ -189,24 +192,32 @@ const routers = [
     name: 'DevolucionListado',
     component: DevolucionesListadoPage,
     default: false,
-    hidden: true,
-    icon: 'package-variant-closed',
-    title: 'Devoluciones', 
+    hidden: false,
+    icon: 'history',
+    title: 'Historial',
   },
   {
-    name: 'DevolucionCreacion',
-    component: DevolucionCreacionPage,
+    name: 'DevolucionPollosCreacion',
+    component: DevolucionPollosCreacionPage,
     default: false,
     hidden: false,
-    icon: 'package-variant-closed',
-    title: 'Devoluciones',
+    icon: 'food-drumstick',
+    title: 'Crear Devolución Pollos',
+  },
+  {
+    name: 'DevolucionInsumosCreacion',
+    component: DevolucionInsumosCreacionPage,
+    default: false,
+    hidden: false,
+    icon: 'bottle-tonic-outline',
+    title: 'Crear Devolución Insumos',
   },
   {
     name: 'HistorialPublicaciones',
     component: HistorialPublicacionesScreen,
     default: false,
     hidden: false,
-    icon: 'newspaper-variant-multiple',
+    icon: 'history',
     title: 'Publicaciones',
   },
   {
@@ -216,6 +227,22 @@ const routers = [
     hidden: true,
     icon: '',
     title: 'Detalle Publicación',
+  },
+  {
+    name: 'DevolucionDetalle',
+    component: DevolucionDetallePage,
+    default: false,
+    hidden: true,
+    icon: '',
+    title: 'Detalle de Devolución',
+  },
+  {
+    name: 'AdminPermisosMenu',
+    component: AdminPermisosMenuPage,
+    default: false,
+    hidden: true, // Se maneja oculto del Drawer normal, lo pondremos a mano
+    icon: 'shield-account',
+    title: 'Panel Administrador',
   },
 ] as const satisfies readonly RoutersType[];
 
