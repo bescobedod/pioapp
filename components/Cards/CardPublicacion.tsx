@@ -4,10 +4,9 @@ import { Surface, Text, Button, useTheme } from 'react-native-paper';
 import { PublicacionType } from '../../helpers/http/Apis/PublicacionesApi';
 import { NavigationService } from '../../helpers/navigator/navigationScreens';
 import moment from 'moment';
+import 'moment/locale/es';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+
 
 interface Props {
   publicacion: PublicacionType;
@@ -28,9 +27,15 @@ export default function CardPublicacion({ publicacion }: Props) {
 
   return (
     <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
-      <Surface
+      <View
         className="m-2 overflow-hidden rounded-xl"
         style={{
+          backgroundColor: theme.colors.surface,
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.2,
+          shadowRadius: 1.41,
           borderTopWidth: 5,
           borderTopColor: catColor,
         }}>
@@ -69,7 +74,7 @@ export default function CardPublicacion({ publicacion }: Props) {
             Ver Detalle Completos
           </Button>
         </View>
-      </Surface>
+      </View>
     </Animated.View>
   );
 }
