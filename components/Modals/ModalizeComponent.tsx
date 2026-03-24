@@ -48,7 +48,7 @@ export default function ModalizeComponent({
                 handleStyle={{ backgroundColor: theme.colors.outline }}
                 scrollViewProps={{ 
                     contentContainerStyle: { padding: 25 },
-                    keyboardShouldPersistTaps: 'handled',
+                    keyboardShouldPersistTaps: 'always',
                     keyboardDismissMode: 'on-drag',
                     ...scrollViewProps
                 }}

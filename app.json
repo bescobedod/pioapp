@@ -4,7 +4,7 @@
     "name": "pioapp",
     "slug": "pioapp",
     "scheme": "pioapp",
-    "version": "1.0.5",
+    "version": "1.1.0",
     "web": {
       "favicon": "./assets/images/LOGOPINULITO.png",
       "bundler": "metro"
