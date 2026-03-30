@@ -2,7 +2,7 @@ import ButtonForm from 'components/form/ButtonForm';
 import InputFormHook from 'components/form/InputFormHook';
 import TextInfo from 'components/typografy/TextInfo';
 import Title from 'components/typografy/Title';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import BoxImage from 'components/container/BoxImage';
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -26,6 +26,7 @@ import BiometricStorageType from 'types/Biometric/BiometricStorageType';
 import { UserSessionType } from 'types/auth/UserSessionType';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useMicrosoftAuth } from 'helpers/auth/MicrosoftAuthHelper';
+import Constants from 'expo-constants';
 
 type DataFcmType = {
   idDevice: string|null;
@@ -340,6 +341,7 @@ export default function Login() {
             label='Ingresar'/>
         </View>
 
+        {/* Ocultado temporalmente
         <View className='w-full mt-3 flex-row justify-center items-center'>
           <SurfaceTapButton 
             title='¿Olvidaste tu contraseña?'
@@ -348,7 +350,9 @@ export default function Login() {
             icon='lock-question'
           />
         </View>
+        */}
 
+        {/* Ocultado temporalmente
         <View className='w-full mt-3 flex-row justify-center items-center flex-wrap' style={{ gap: 5 }}>
           <SurfaceTapButton 
             icon='fingerprint'
@@ -366,6 +370,13 @@ export default function Login() {
             }}
             disabled={loadingLogin || !msRequest}
           />
+        </View>
+        */}
+
+        <View className='mt-10 items-center justify-center opacity-50'>
+          <Text className='text-xs text-gray-500 font-bold tracking-widest'>
+            v{Constants.expoConfig?.version || '1.1.1'}
+          </Text>
         </View>
 
       </View>

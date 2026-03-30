@@ -22,6 +22,7 @@ import { AJAX, URLPIOAPP } from 'helpers/http/ajax';
 import AppInitTransition from 'components/Animaciones/AppInitTransition';
 import { configureNotificationHandler } from 'helpers/Notification/NotificationPushHelper';
 import LoadingScreenAll from 'components/Screens/LoadingScreenAll';
+import ForceUpdateApp from 'components/Screens/ForceUpdateApp';
 
 configureNotificationHandler()
 
@@ -76,21 +77,23 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider theme={theme}>
         <AppInitTransition loading={!fontsLoaded || !validSession}>
-          <NavigationContainer 
-            ref={navigationGlobal}
-            onReady={NavigationService.updateCurrentRouteName}
-            onStateChange={NavigationService.updateCurrentRouteName}
-          >
-            <DrawerDashboard/>
-            {/* Loading screen global */}
-            <LoadingScreen/>
-            {/* snackbar alerts global */}
-            <SnackBarAlert/>
-            {/* screen loading */}
-            <LoadingScreenAll/>
+          <ForceUpdateApp>
+            <NavigationContainer 
+              ref={navigationGlobal}
+              onReady={NavigationService.updateCurrentRouteName}
+              onStateChange={NavigationService.updateCurrentRouteName}
+            >
+              <DrawerDashboard/>
+              {/* Loading screen global */}
+              <LoadingScreen/>
+              {/* snackbar alerts global */}
+              <SnackBarAlert/>
+              {/* screen loading */}
+              <LoadingScreenAll/>
 
-            <StackNavigatorApp initialRouteName={routerInit}/>
-          </NavigationContainer>
+              <StackNavigatorApp initialRouteName={routerInit}/>
+            </NavigationContainer>
+          </ForceUpdateApp>
         </AppInitTransition>
       </PaperProvider>
     </GestureHandlerRootView>

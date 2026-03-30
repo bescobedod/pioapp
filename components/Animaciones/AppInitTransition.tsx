@@ -36,6 +36,7 @@
 // }
 
 import React from "react";
+import { View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -59,29 +60,16 @@ export default function AppInitTransition({
   const theme = useTheme() as AppTheme
 
   return (
-    <Animated.View style={{ flex: 1, backgroundColor: theme.colors.background }} layout={Layout.duration(400)}>
-      
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {loading ? (
-        <Animated.View
-          key="loader"
-          entering={FadeIn.duration(300).easing(Easing.out(Easing.ease))}
-          // entering={FadeIn.duration(300).easing(Easing.out(Easing.ease))}
-          exiting={FadeOut.duration(200).easing(Easing.inOut(Easing.quad))}
-          style={{ flex: 1 }}
-        >
-          <PageLoadingInit loading/>
-        </Animated.View>
+        <View style={{ flex: 1 }}>
+          <PageLoadingInit loading={true} />
+        </View>
       ) : (
-        <Animated.View
-          key="app"
-          entering={FadeIn.duration(300).easing(Easing.out(Easing.ease))}
-          exiting={FadeOut.duration(200).easing(Easing.inOut(Easing.quad))}
-          style={{ flex: 1 }}
-        >
+        <View style={{ flex: 1 }}>
           {children}
-        </Animated.View>
+        </View>
       )}
-
-    </Animated.View>
+    </View>
   );
 }

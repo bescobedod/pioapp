@@ -22,7 +22,7 @@ export default function CardDevolucion({ devolucion, onPress }: Props) {
   const totalProductos = devolucion.total_productos ?? devolucion.totalProductos ?? null;
 
   return (
-    <Surface className="m-2 overflow-hidden rounded-xl">
+    <View className="m-2 overflow-hidden rounded-xl" style={{ backgroundColor: theme.colors.surface, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 1.41 }}>
       <View className="flex-row items-center justify-between p-4 pb-2">
         <View style={{ backgroundColor: `${tagColor}20` }} className="rounded-full px-3 py-1">
           <Text style={{ color: tagColor, fontWeight: 'bold', fontSize: 12 }}>
@@ -72,6 +72,6 @@ export default function CardDevolucion({ devolucion, onPress }: Props) {
           Ver Detalle
         </Button>
       </View>
-    </Surface>
+    </View>
   );
 }

@@ -37,7 +37,7 @@ export default function ModalizeDevolucionArticulo({
 }:ModalizeDevolucionArticuloProps) {
 
     const theme = useTheme() as AppTheme
-    const { control, handleSubmit, resetField, formState: { errors, isValid }, watch } = useForm({
+    const { control, handleSubmit, reset, formState: { errors, isValid }, watch } = useForm({
         resolver: yupResolver(schemaEditCountDevolucion()),
         mode: 'all'
     })
@@ -90,11 +90,6 @@ export default function ModalizeDevolucionArticulo({
 
     const onOpenModalizeDevolucionArticulo = () => {
         if(!selectArticuloDevolucion) return
-        resetField('id_devolucion_motivo', { defaultValue: selectArticuloDevolucion?.id_devolucion_motivo ?? undefined })
-        // @ts-ignore
-        resetField('cantidad_devolucion', { defaultValue: selectArticuloDevolucion?.cantidadDevolver ? Number(selectArticuloDevolucion.cantidadDevolver) : undefined })
-        // @ts-ignore
-        resetField('unidad_devolucion', { defaultValue: selectArticuloDevolucion?.unidadMedidaDevolucion ?? undefined })
         
         let p1 = '', p2 = '', p3 = '', p4 = '';
         if (selectArticuloDevolucion.piezas) {
@@ -105,16 +100,19 @@ export default function ModalizeDevolucionArticulo({
                 if(p.id_pieza === 4) p4 = p.cantidad.toString();
             })
         }
-        // @ts-ignore
-        resetField('pieza_1', { defaultValue: p1 });
-        // @ts-ignore
-        resetField('pieza_2', { defaultValue: p2 });
-        // @ts-ignore
-        resetField('pieza_3', { defaultValue: p3 });
-        // @ts-ignore
-        resetField('pieza_4', { defaultValue: p4 });
-        resetField('tipo_pollo_reclamo', { defaultValue: undefined });
-        resetField('peso_bascula_reclamo', { defaultValue: undefined });
+
+        // Se usa reset() en lugar de n-resetField() para limpiar por completo cualquier estado arrastrado de un articulo anterior
+        reset({
+            id_devolucion_motivo: selectArticuloDevolucion?.id_devolucion_motivo,
+            cantidad_devolucion: selectArticuloDevolucion?.cantidadDevolver ? Number(selectArticuloDevolucion.cantidadDevolver) : undefined,
+            unidad_devolucion: selectArticuloDevolucion?.unidadMedidaDevolucion ?? undefined,
+            pieza_1: p1 ? Number(p1) : undefined,
+            pieza_2: p2 ? Number(p2) : undefined,
+            pieza_3: p3 ? Number(p3) : undefined,
+            pieza_4: p4 ? Number(p4) : undefined,
+            tipo_pollo_reclamo: undefined,
+            peso_bascula_reclamo: undefined
+        });
     }
 
     const onSubmitForm = (data:any) => {

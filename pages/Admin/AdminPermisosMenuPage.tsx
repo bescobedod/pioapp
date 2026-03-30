@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import { Text, Surface, FAB, useTheme, ActivityIndicator, Divider, Switch, List } from 'react-native-paper';
+import { Surface, FAB, useTheme, ActivityIndicator, Divider, Switch, List } from 'react-native-paper';
 import PageLayout from 'components/Layouts/PageLayout';
+import TextInfo from 'components/typografy/TextInfo';
+import Title from 'components/typografy/Title';
 import * as AdminApi from '../../Apis/Admin/AdminPermissionApi';
 import alertsState from 'helpers/states/alertsState';
 import globalState from 'helpers/states/globalState';
@@ -138,8 +140,8 @@ export default function AdminPermisosMenuPage() {
       <View className="flex-1 p-4 pb-20">
         
         {/* Selector de Rol */}
-        <Surface className="mb-4 rounded-xl p-4" elevation={2}>
-          <Text variant="labelLarge" className="mt-1 mb-2 text-gray-500 font-bold">Seleccionar Rol</Text>
+        <View className="mb-4 rounded-xl p-4" style={{ backgroundColor: theme.colors.surface, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 1.41 }}>
+          <TextInfo style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12 }}>Seleccionar Rol a Administrar</TextInfo>
           <Dropdown
             data={roles.map(r => ({ label: r.name, value: r.id_rol }))}
             value={selectedRol}
@@ -157,7 +159,7 @@ export default function AdminPermisosMenuPage() {
             selectedTextStyle={{ color: theme.colors.onBackground }}
             activeColor={theme.colors.surfaceVariant}
           />
-        </Surface>
+        </View>
 
         {/* Treeview de Menus */}
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -168,11 +170,11 @@ export default function AdminPermisosMenuPage() {
             const isAllSelected = cat.menus.every((m: any) => activePermissions.has(m.id_menu_app));
             
             return (
-              <Surface key={`cat-${cat.id_categorias_menu || i}`} className="mb-4 overflow-hidden rounded-xl" elevation={1}>
+              <View key={`cat-${cat.id_categorias_menu || i}`} className="mb-4 overflow-hidden rounded-xl" style={{ backgroundColor: theme.colors.surface, elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 1 }}>
                 
                 {/* Header Categoria */}
                 <View className="flex-row items-center justify-between bg-gray-100 p-3 dark:bg-gray-800">
-                  <Text variant="titleMedium" className="font-bold">{cat.name_category}</Text>
+                  <Title style={{ fontSize: 17, marginBottom: 0 }}>{cat.name_category}</Title>
                   <Switch 
                      value={isAllSelected}
                      onValueChange={() => toggleAllInCategory(cat.id_categorias_menu, cat.menus, isAllSelected)}
@@ -206,7 +208,7 @@ export default function AdminPermisosMenuPage() {
                    );
                 })}
 
-              </Surface>
+              </View>
             );
           })}
         </ScrollView>
