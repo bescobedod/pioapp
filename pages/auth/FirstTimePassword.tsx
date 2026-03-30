@@ -14,6 +14,7 @@ import { NavigationService } from 'helpers/navigator/navigationScreens';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import BoxImage from 'components/container/BoxImage';
 import { LOGOPINULITOORIGINAL } from 'assets/Providers/ImageProvider';
+import SurfaceTapButton from 'components/container/SurfaceTapButton';
 
 const schema = yup.object().shape({
   newPassword: yup.string()
@@ -103,6 +104,15 @@ export default function FirstTimePassword() {
             loading={loading}
             onPress={handleSubmit(onSubmit)} 
             label='Guardar y Continuar'
+          />
+        </View>
+
+        <View className='w-full mt-5 flex-row justify-center items-center'>
+          <SurfaceTapButton 
+            title='Volver al Login'
+            onPress={() => NavigationService.reset('Login')}
+            disabled={loading}
+            icon='arrow-left'
           />
         </View>
       </View>

@@ -281,6 +281,7 @@ export default function PersonalUser() {
                             <View className="w-full">
                                 <ListSubheader label="Personal"/>
 
+                                {/* Ocultados temporalmente
                                 <ListItemComponent
                                     onPress={() => {
                                         if (msRequest) msPromptAsync();
@@ -302,6 +303,7 @@ export default function PersonalUser() {
                                         />
                                     )
                                 }
+                                */}
 
                             </View>
 

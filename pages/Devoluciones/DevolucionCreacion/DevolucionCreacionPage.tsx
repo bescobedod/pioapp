@@ -133,7 +133,7 @@ export default function DevolucionPollosCreacionPage() {
         let customUnidadMedida = "Bolsa de 5 Libras";
         if (el.ItemCode === 'MP0006') customUnidadMedida = "Pollo(s)";
         else if (el.ItemCode === 'MP0010') customUnidadMedida = "Unidad(es)";
-        else if (el.ItemCode === 'MP0004') customUnidadMedida = "Bolsa de 64 Unidades";
+        else if (el.ItemCode === 'MP0004') customUnidadMedida = "Bolsa de 60 Unidades";
 
         return { 
           nombreProducto: el.ItemDescription,
