@@ -2,14 +2,16 @@
  * Constantes para el módulo de Boletas
  */
 
+const REPORTS_BASE_URL = process.env.EXPO_PUBLIC_REPORTS_URL;
+
 // URLs del sistema
-export const BOLETA_PDF_BASE_URL = 'http://sistema.grupopinulito.com:81/nomina/reports/formats/boletaFirmada.php';
+export const BOLETA_PDF_BASE_URL = `${REPORTS_BASE_URL}/nomina/reports/formats/boletaFirmada.php`;
 
-export const BOLETA_BONO14_PDF_URL = 'http://sistema.grupopinulito.com:81/nomina/reports/formats/boletaBonoConfirmada.php'
+export const BOLETA_BONO14_PDF_URL = `${REPORTS_BASE_URL}/nomina/reports/formats/boletaBonoConfirmada.php`
 
-export const BOLETA_AGUINALDO_PDF_URL = 'http://sistema.grupopinulito.com:81/nomina/reports/formats/boletaAguinaldoConfirmada.php'
+export const BOLETA_AGUINALDO_PDF_URL = `${REPORTS_BASE_URL}/nomina/reports/formats/boletaAguinaldoConfirmada.php`
 
-export const BOLETA_VACACION_PDF_URL = 'http://sistema.grupopinulito.com:81/nomina/reports/formatosRH/reporteVacaciones.php'
+export const BOLETA_VACACION_PDF_URL = `${REPORTS_BASE_URL}/nomina/reports/formatosRH/reporteVacaciones.php`
 
 // Mensajes de la aplicación
 export const BOLETA_MESSAGES = {

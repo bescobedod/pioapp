@@ -341,7 +341,6 @@ export default function Login() {
             label='Ingresar'/>
         </View>
 
-        {/* Ocultado temporalmente
         <View className='w-full mt-3 flex-row justify-center items-center'>
           <SurfaceTapButton 
             title='¿Olvidaste tu contraseña?'
@@ -350,7 +349,6 @@ export default function Login() {
             icon='lock-question'
           />
         </View>
-        */}
 
         {/* Ocultado temporalmente
         <View className='w-full mt-3 flex-row justify-center items-center flex-wrap' style={{ gap: 5 }}>
@@ -375,7 +373,7 @@ export default function Login() {
 
         <View className='mt-10 items-center justify-center opacity-50'>
           <Text className='text-xs text-gray-500 font-bold tracking-widest'>
-            v{Constants.expoConfig?.version || '1.1.1'}
+            v{Constants.expoConfig?.version || '1.1.2'}
           </Text>
         </View>
 
