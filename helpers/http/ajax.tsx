@@ -8,17 +8,17 @@ import { UserSessionType } from 'types/auth/UserSessionType';
 import { AuthHedearsType } from 'types/Request/AuthorizationTypes';
 import MethodRequestType from 'types/Request/MethodRequestType';
 
-export const URLDIVIDENDOS = `http://3.22.33.142`;
-// export const URLDIVIDENDOS = `http://sistema.grupopinulito.com:81`
+export const URLDIVIDENDOS = process.env.EXPO_PUBLIC_DIVIDENDOS_URL;
+// export const URLDIVIDENDOS = `http://3.22.33.142`
 
-// export const URLPIOAPP = `https://kevin-unrelegated-ramon.ngrok-free.dev/api`;
+export const URLPIOAPP = process.env.EXPO_PUBLIC_API_URL;
 
 //local pruva PORT
 // export const URLPIOAPP = `http://10.0.2.2:5000/api`
 // export const URLPIOAPP = `https://5ddd8gl6-5001.use2.devtunnels.ms/api`;
 
 //Produccion
-export const URLPIOAPP = `https://services.sistemaspinulito.com/pioapi`
+// export const URLPIOAPP = `https://services.sistemaspinulito.com/pioapi`
 
 //variables para authentication con basic auth
 export const BASIC_AUTH_USERNAME = process.env.EXPO_PUBLIC_BASIC_AUTH_USERNAME
@@ -104,10 +104,12 @@ export async function AJAX(
     const data: object | any = blob ? await response.blob() : await response.json();
 
     if (response.status == 401 && authorization === 'bearer') {
-      // Evitar bucle infinito si la ruta de refresh falla
-      if (url.includes('/refresh-token')) {
-        alertsState.getState().openVisibleSnackBar('Su sesión ha expirado, ingrese nuevamente.', 'error');
-        logout();
+      // Evitar bucle infinito si la ruta de refresh o logout falla
+      if (url.includes('/refresh-token') || url.includes('/auth/logout')) {
+        if (!url.includes('/auth/logout')) {
+           alertsState.getState().openVisibleSnackBar('Su sesión ha expirado, ingrese nuevamente.', 'error');
+           logout();
+        }
         await new Promise(() => {}); // Promesa infinita para congelar el hilo y evitar catches
         return null;
       }

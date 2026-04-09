@@ -3,7 +3,7 @@ import {
   DetalleEntradaInventario,
   EntradaInventarioType,
 } from 'Apis/ArticulosRecepcion/ArticulosRecepcionApi';
-import { getTiendas } from 'Apis/TiendasModulo/TiendasModuloApi';
+import { getAssignedTiendas, getTiendas } from 'Apis/TiendasModulo/TiendasModuloApi';
 import FormAdaptiveKeyBoard from 'components/container/FormAdaptiveKeyBoard';
 import PickerFile from 'components/container/PickerFile';
 import ScrollViewContainer from 'components/container/ScrollViewContainer';
@@ -53,6 +53,7 @@ export default function DevolucionPollosCreacionPage() {
     handleSubmit,
     reset,
     resetField,
+    setValue,
     formState: { errors, isValid },
     watch,
   } = useForm({
@@ -87,13 +88,18 @@ export default function DevolucionPollosCreacionPage() {
   };
 
   const renderTiendas = async () => {
-    const listTiendas = await getTiendas();
+    const listTiendas = await getAssignedTiendas();
     setTiendasList(listTiendas.data ?? []);
     const flatTiendas: any = listTiendas.data?.flatMap((el) => ({
       label: el.nombre_tienda,
       value: `${el.codigo_empresa}-${el.codigo_tienda}`,
     }));
     setTiendasState(flatTiendas);
+    
+    if (flatTiendas && flatTiendas.length === 1) {
+      setValue('tienda', flatTiendas[0].value, { shouldValidate: true });
+    }
+    
     setInitLoadingPage(false);
   };
 

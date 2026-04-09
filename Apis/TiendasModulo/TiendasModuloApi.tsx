@@ -56,3 +56,13 @@ export const getTiendas = async():Promise<ResponseService<any[]>> => {
         return generateJsonError(`${error}`, "array")
     }
 }
+
+export const getAssignedTiendas = async():Promise<ResponseService<any[]>> => {
+    try {
+        const result:ResponseService<any[]> = await AJAX(`${URLPIOAPP}/tiendas/modulo/assigned`)
+        return result
+    } catch (error) {
+        alertsState.getState().openVisibleSnackBar(`${error}`, 'error')
+        return generateJsonError(`${error}`, "array")
+    }
+}
